@@ -44,7 +44,7 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (ForvardVelocity.Size() < GravityThreshHold)
+	/*if (ForvardVelocity.Size() < GravityThreshHold)
 	{
 		FVector UnrotatedVector = GetActorRotation().UnrotateVector(GetActorUpVector());
 		float ToLerp = 1.0 - (ForvardVelocity.Size() / GravityThreshHold);
@@ -53,8 +53,12 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 	else
 	{
 		UpVelocity = FMath::VInterpTo(UpVelocity, FVector::ZeroVector, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 20.f);
-	}
+	}*/
 	
+	FVector UnrotatedVector = GetActorRotation().UnrotateVector(GetActorUpVector());
+	float ToLerp = 1.0 - (ForvardVelocity.Size() / GravityThreshHold);
+	//UpVelocity = UnrotatedVector * FMath::Lerp(0.f, -980.f, ToLerp);
+
 	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity + UpVelocity);
 
 
@@ -75,7 +79,7 @@ void ASkyFlyJetPawn::JetThrust(float value)
 {
 	if (!FMath::IsNearlyZero(value))
 	{
-		float Res = FMath::Lerp(0.f, MaxThrust, (value + 1.f) / 2.f);
+		float Res = FMath::Lerp(-MaxThrust, MaxThrust, (value + 1.f) / 2.f);
 		UE_LOG(LogTemp, Warning, TEXT("Lerp: %f"), Res);
 		Thrust = FMath::FInterpTo(Thrust, Res, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 0.25);
 		UE_LOG(LogTemp, Warning, TEXT("Thrust: %f"), Thrust);
@@ -95,6 +99,6 @@ void ASkyFlyJetPawn::MoveRight(float value)
 
 void ASkyFlyJetPawn::Roll(float value)
 {
-	JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * -20.f, NAME_None, true);
+	JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 20.f, NAME_None, true);
 }
 
