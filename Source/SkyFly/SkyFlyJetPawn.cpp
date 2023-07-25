@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ASkyFlyJetPawn::ASkyFlyJetPawn()
@@ -73,6 +74,8 @@ void ASkyFlyJetPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("MoveUp", this, &ASkyFlyJetPawn::MoveUp);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASkyFlyJetPawn::MoveRight);
 	PlayerInputComponent->BindAxis("Roll", this, &ASkyFlyJetPawn::Roll);
+
+	PlayerInputComponent->BindAction("OnBulletFire", IE_Pressed, this, &ASkyFlyJetPawn::OnBulletFire);
 }
 
 void ASkyFlyJetPawn::JetThrust(float value)
@@ -100,5 +103,29 @@ void ASkyFlyJetPawn::MoveRight(float value)
 void ASkyFlyJetPawn::Roll(float value)
 {
 	JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 20.f, NAME_None, true);
+}
+
+void ASkyFlyJetPawn::OnBulletFire()
+{
+	if (BulletClass != NULL)
+	{
+		const FRotator SpawnRotation = GetControlRotation();
+
+		const FVector SpawnLocation = JetMesh->K2_GetComponentLocation();
+
+		UWorld* World = GetWorld();
+
+		if (World != NULL)
+		{
+			ASkyShiftBullet* Bullet = World->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
+
+
+			FVector NewVelocity = GetActorForwardVector() * 5000.f;
+
+			DrawDebugLine(GetWorld(), GetActorLocation(), GetActorForwardVector() * 5000.f, FColor::Emerald, true, -1, 0, 10);
+
+			Bullet->SetVelocity(NewVelocity);
+		}
+	}
 }
 

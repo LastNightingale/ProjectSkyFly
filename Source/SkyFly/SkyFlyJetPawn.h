@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SkyShiftBullet.h"
 #include "GameFramework/Pawn.h"
 #include "SkyFlyJetPawn.generated.h"
 
@@ -39,6 +40,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	FVector UpVelocity = FVector(0.f);
 
+	UPROPERTY(EditAnywhere, Category = "Shooting")
+	TSubclassOf<ASkyShiftBullet> BulletClass;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -53,7 +57,6 @@ public:
 	UFUNCTION()
 	void JetThrust(float value);
 
-
 	UFUNCTION()
 	void MoveUp(float value);
 
@@ -62,4 +65,7 @@ public:
 
 	UFUNCTION()
 	void Roll(float value);
+
+	UFUNCTION()
+	void OnBulletFire();
 };
