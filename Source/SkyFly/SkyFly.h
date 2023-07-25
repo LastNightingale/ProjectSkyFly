@@ -4,5 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Net/UnrealNetwork.h"
+#include "UObject/CoreNet.h"
 //#include "Kismet/GameplayStatics.h"
 

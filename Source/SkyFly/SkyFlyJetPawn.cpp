@@ -56,12 +56,12 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 		UpVelocity = FMath::VInterpTo(UpVelocity, FVector::ZeroVector, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 20.f);
 	}*/
 	
-	FVector UnrotatedVector = GetActorRotation().UnrotateVector(GetActorUpVector());
-	float ToLerp = 1.0 - (ForvardVelocity.Size() / GravityThreshHold);
-	//UpVelocity = UnrotatedVector * FMath::Lerp(0.f, -980.f, ToLerp);
+	//FVector UnrotatedVector = GetActorRotation().UnrotateVector(GetActorUpVector());
+	//float ToLerp = 1.0 - (ForvardVelocity.Size() / GravityThreshHold);
+	////UpVelocity = UnrotatedVector * FMath::Lerp(0.f, -980.f, ToLerp);
 
-	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity + UpVelocity);
-
+	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);
+	
 
 }
 
@@ -76,6 +76,14 @@ void ASkyFlyJetPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("Roll", this, &ASkyFlyJetPawn::Roll);
 
 	PlayerInputComponent->BindAction("OnBulletFire", IE_Pressed, this, &ASkyFlyJetPawn::OnBulletFire);
+}
+
+void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
+	DOREPLIFETIME(ASkyFlyJetPawn, ForvardVelocity);
 }
 
 void ASkyFlyJetPawn::JetThrust(float value)
@@ -125,7 +133,27 @@ void ASkyFlyJetPawn::OnBulletFire()
 			DrawDebugLine(GetWorld(), GetActorLocation(), GetActorForwardVector() * 5000.f, FColor::Emerald, true, -1, 0, 10);
 
 			Bullet->SetVelocity(NewVelocity);
+
+			if (!HasAuthority())
+			{
+				Server_OnBulletFire(SpawnLocation, SpawnRotation, GetActorForwardVector() * 5000.f);
+			}
 		}
 	}
 }
+
+bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
+{
+	return true;
+}
+
+void ASkyFlyJetPawn::Server_OnBulletFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
+{
+	ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
+
+
+	Bullet->SetVelocity(Direction);
+}
+
+
 

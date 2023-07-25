@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "SkyShiftBullet.h"
 #include "GameFramework/Pawn.h"
+#include "Net/UnrealNetwork.h"
+//#include "UObject/CoreNet.h"
 #include "SkyFlyJetPawn.generated.h"
 
 UCLASS()
@@ -25,7 +27,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Components")
 	class UCameraComponent* Camera;
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
 	float Thrust = 0.f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
@@ -34,7 +36,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float GravityThreshHold = 1000.f;
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
 	FVector ForvardVelocity = FVector(0.f);
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
@@ -54,6 +56,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UFUNCTION()
 	void JetThrust(float value);
 
@@ -68,4 +72,9 @@ public:
 
 	UFUNCTION()
 	void OnBulletFire();
+
+	UFUNCTION(Server, unreliable)
+	void Server_OnBulletFire(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
+	bool Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
+	void Server_OnBulletFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 };
