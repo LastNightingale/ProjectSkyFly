@@ -13,12 +13,13 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	SetReplicateMovement(true);
-	SetReplicates(true);
+	bReplicates = true;
 	//bAlwaysRelevant = true;
 
 	JetMesh = CreateDefaultSubobject<UStaticMeshComponent>("Jet Mesh");
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>("Camera Arm");
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	MovingComponent = CreateDefaultSubobject<UFloatingPawnMovement>("Movement Component");
 
 	SetRootComponent(JetMesh);
 
@@ -64,8 +65,16 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 	//float ToLerp = 1.0 - (ForvardVelocity.Size() / GravityThreshHold);
 	////UpVelocity = UnrotatedVector * FMath::Lerp(0.f, -980.f, ToLerp);
 
+	if (HasAuthority() && !IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *ForvardVelocity.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Vector: %f"), Thrust);
+	}
+
 	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);	
 	
+	//MovingComponent->AddInputVector(ForvardVelocity, true);
+	/*AddMovementInput(ForvardVelocity);*/
 }
 
 // Called to bind functionality to input
@@ -85,8 +94,8 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	/*DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
-	DOREPLIFETIME(ASkyFlyJetPawn, ForvardVelocity);*/
+	DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
+	DOREPLIFETIME(ASkyFlyJetPawn, ForvardVelocity);
 }
 
 void ASkyFlyJetPawn::JetThrust(float value)
@@ -99,6 +108,8 @@ void ASkyFlyJetPawn::JetThrust(float value)
 		UE_LOG(LogTemp, Warning, TEXT("Thrust: %f"), Thrust);
 	}
 	ForvardVelocity = GetActorForwardVector() * Thrust;
+
+	Server_SetLinearVelocity(ForvardVelocity);
 }
 
 void ASkyFlyJetPawn::MoveUp(float value)
@@ -193,6 +204,16 @@ bool ASkyFlyJetPawn::Server_SetRotation_Validate(FVector Direction, float value)
 void ASkyFlyJetPawn::Server_SetRotation_Implementation(FVector Direction, float value)
 {
 	JetMesh->AddTorqueInDegrees(Direction * value, NAME_None, true);
+}
+
+bool ASkyFlyJetPawn::Server_SetLinearVelocity_Validate(FVector NewVelocity)
+{
+	return true;
+}
+
+void ASkyFlyJetPawn::Server_SetLinearVelocity_Implementation(FVector NewVelocity)
+{
+	ForvardVelocity = NewVelocity;
 }
 
 //bool ASkyFlyJetPawn::Server_SetTransformation_Validate(FTransform NewTransform)

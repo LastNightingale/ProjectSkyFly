@@ -7,6 +7,7 @@
 #include "GameFramework/Pawn.h"
 #include "Net/UnrealNetwork.h"
 //#include "UObject/CoreNet.h"
+#include "GameFramework/FloatingPawnMovement.h"
 #include "SkyFlyJetPawn.generated.h"
 
 UCLASS()
@@ -27,20 +28,23 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Components")
 	class UCameraComponent* Camera;
 
-	UPROPERTY(/*Replicated, */EditAnywhere, Category = "Movement")
+	UPROPERTY(EditAnywhere, Category = "Components")
+	class UFloatingPawnMovement* MovingComponent;
+
+	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
 	float Thrust = 0.f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float MaxThrust = 5000.f;
+	float MaxThrust = 5000.f;	
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
-	float GravityThreshHold = 1000.f;
+	/*UPROPERTY(EditAnywhere, Category = "Movement")
+	float GravityThreshHold = 1000.f;*/
 
-	UPROPERTY(/*Replicated, */EditAnywhere, Category = "Movement")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
 	FVector ForvardVelocity = FVector(0.f);
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
-	FVector UpVelocity = FVector(0.f);
+	/*UPROPERTY(EditAnywhere, Category = "Movement")
+	FVector UpVelocity = FVector(0.f);*/
 
 	UPROPERTY(EditAnywhere, Category = "Shooting")
 	TSubclassOf<ASkyShiftBullet> BulletClass;
@@ -56,7 +60,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;	
 
 	UFUNCTION()
 	void JetThrust(float value);
@@ -88,7 +92,10 @@ public:
 	bool Server_SetRotation_Validate(FVector Direction, float value);
 	void Server_SetRotation_Implementation(FVector Direction, float value);
 
-
+	UFUNCTION(Server, unreliable, WithValidation)
+	void Server_SetLinearVelocity(FVector NewVelocity);
+	bool Server_SetLinearVelocity_Validate(FVector NewVelocity);
+	void Server_SetLinearVelocity_Implementation(FVector NewVelocity);
 	/*UFUNCTION(Server, reliable, WithValidation)
 	void Server_SetTransformation(FTransform NewTransform);
 	bool Server_SetTransformation_Validate(FTransform NewTransform);
