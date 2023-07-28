@@ -27,7 +27,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Components")
 	class UCameraComponent* Camera;
 
-	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
+	UPROPERTY(/*Replicated, */EditAnywhere, Category = "Movement")
 	float Thrust = 0.f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
@@ -36,7 +36,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float GravityThreshHold = 1000.f;
 
-	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
+	UPROPERTY(/*Replicated, */EditAnywhere, Category = "Movement")
 	FVector ForvardVelocity = FVector(0.f);
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
@@ -73,8 +73,24 @@ public:
 	UFUNCTION()
 	void OnBulletFire();
 
-	UFUNCTION(Server, unreliable)
+	UFUNCTION(Server, unreliable, WithValidation)
 	void Server_OnBulletFire(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 	bool Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 	void Server_OnBulletFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
+
+	UFUNCTION(Server, reliable, WithValidation)
+	void Server_SetLocation(FVector NewLocation);
+	bool Server_SetLocation_Validate(FVector NewLocation);
+	void Server_SetLocation_Implementation(FVector NewLocation);
+
+	UFUNCTION(Server, unreliable, WithValidation)
+	void Server_SetRotation(FVector Direction, float value);
+	bool Server_SetRotation_Validate(FVector Direction, float value);
+	void Server_SetRotation_Implementation(FVector Direction, float value);
+
+
+	/*UFUNCTION(Server, reliable, WithValidation)
+	void Server_SetTransformation(FTransform NewTransform);
+	bool Server_SetTransformation_Validate(FTransform NewTransform);
+	void Server_SetTransformation_Implementation(FTransform NewTransform);*/
 };

@@ -12,6 +12,9 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	SetReplicateMovement(true);
+	SetReplicates(true);
+	//bAlwaysRelevant = true;
 
 	JetMesh = CreateDefaultSubobject<UStaticMeshComponent>("Jet Mesh");
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>("Camera Arm");
@@ -45,6 +48,7 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+
 	/*if (ForvardVelocity.Size() < GravityThreshHold)
 	{
 		FVector UnrotatedVector = GetActorRotation().UnrotateVector(GetActorUpVector());
@@ -60,9 +64,8 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 	//float ToLerp = 1.0 - (ForvardVelocity.Size() / GravityThreshHold);
 	////UpVelocity = UnrotatedVector * FMath::Lerp(0.f, -980.f, ToLerp);
 
-	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);
+	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);	
 	
-
 }
 
 // Called to bind functionality to input
@@ -82,8 +85,8 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
-	DOREPLIFETIME(ASkyFlyJetPawn, ForvardVelocity);
+	/*DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
+	DOREPLIFETIME(ASkyFlyJetPawn, ForvardVelocity);*/
 }
 
 void ASkyFlyJetPawn::JetThrust(float value)
@@ -100,17 +103,33 @@ void ASkyFlyJetPawn::JetThrust(float value)
 
 void ASkyFlyJetPawn::MoveUp(float value)
 {
-	JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -20.f, NAME_None, true);
+	JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -20.f, NAME_None, true);	
+
+	if (!HasAuthority())
+	{
+		Server_SetRotation(GetActorRightVector(), value * -20.f);
+	}
 }
 
 void ASkyFlyJetPawn::MoveRight(float value)
 {
 	JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 20.f, NAME_None, true);
+
+	//JetMesh->SetPhysicsAngularVelocity(FVector(0.f, 0.f, value * 5.f), true);
+	if (!HasAuthority())
+	{
+		Server_SetRotation(GetActorUpVector(), value * 20.f);
+	}
 }
 
 void ASkyFlyJetPawn::Roll(float value)
 {
 	JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 20.f, NAME_None, true);
+
+	if (!HasAuthority())
+	{
+		Server_SetRotation(GetActorForwardVector(), value * 20.f);
+	}
 }
 
 void ASkyFlyJetPawn::OnBulletFire()
@@ -154,6 +173,37 @@ void ASkyFlyJetPawn::Server_OnBulletFire_Implementation(FVector SpawnLocation, F
 
 	Bullet->SetVelocity(Direction);
 }
+
+bool ASkyFlyJetPawn::Server_SetLocation_Validate(FVector NewLocation)
+{
+	return true;
+}
+
+void ASkyFlyJetPawn::Server_SetLocation_Implementation(FVector NewLocation)
+{
+	SetActorLocation(NewLocation);
+	/*JetMesh->SetPhysicsLinearVelocity(NewLocation);*/
+}
+
+bool ASkyFlyJetPawn::Server_SetRotation_Validate(FVector Direction, float value)
+{
+	return true;
+}
+
+void ASkyFlyJetPawn::Server_SetRotation_Implementation(FVector Direction, float value)
+{
+	JetMesh->AddTorqueInDegrees(Direction * value, NAME_None, true);
+}
+
+//bool ASkyFlyJetPawn::Server_SetTransformation_Validate(FTransform NewTransform)
+//{
+//	return true;
+//}
+//
+//void ASkyFlyJetPawn::Server_SetTransformation_Implementation(FTransform NewTransform)
+//{
+//	SetActorTransform(NewTransform);
+//}
 
 
 
