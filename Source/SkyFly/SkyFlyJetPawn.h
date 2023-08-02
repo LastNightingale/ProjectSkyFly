@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SkyShiftBullet.h"
+#include "SkyShiftLaser.h"
 #include "GameFramework/Pawn.h"
 #include "Net/UnrealNetwork.h"
 //#include "UObject/CoreNet.h"
@@ -37,17 +38,17 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float MaxThrust = 5000.f;	
 
-	/*UPROPERTY(EditAnywhere, Category = "Movement")
-	float GravityThreshHold = 1000.f;*/
+	UPROPERTY(EditAnywhere, Category = "Shooting")
+	bool bInPowerMode = false;
 
 	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
-	FVector ForvardVelocity = FVector(0.f);
-
-	/*UPROPERTY(EditAnywhere, Category = "Movement")
-	FVector UpVelocity = FVector(0.f);*/
+	FVector ForvardVelocity = FVector(0.f);	
 
 	UPROPERTY(EditAnywhere, Category = "Shooting")
 	TSubclassOf<ASkyShiftBullet> BulletClass;
+
+	UPROPERTY(EditAnywhere, Category = "Shooting")
+	TSubclassOf<ASkyShiftLaser> LaserClass;
 
 protected:
 	// Called when the game starts or when spawned
@@ -77,6 +78,9 @@ public:
 	UFUNCTION()
 	void OnBulletFire();
 
+	UFUNCTION()
+	void ChangeMode();
+
 	UFUNCTION(Server, unreliable, WithValidation)
 	void Server_OnBulletFire(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 	bool Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
@@ -96,8 +100,9 @@ public:
 	void Server_SetLinearVelocity(FVector NewVelocity);
 	bool Server_SetLinearVelocity_Validate(FVector NewVelocity);
 	void Server_SetLinearVelocity_Implementation(FVector NewVelocity);
-	/*UFUNCTION(Server, reliable, WithValidation)
-	void Server_SetTransformation(FTransform NewTransform);
-	bool Server_SetTransformation_Validate(FTransform NewTransform);
-	void Server_SetTransformation_Implementation(FTransform NewTransform);*/
+	
+	UFUNCTION(Server, unreliable, WithValidation)
+	void Server_OnLaserFire(FVector SpawnLocation, FRotator SpawnRotation);
+	bool Server_OnLaserFire_Validate(FVector SpawnLocation, FRotator SpawnRotation);
+	void Server_OnLaserFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation);
 };

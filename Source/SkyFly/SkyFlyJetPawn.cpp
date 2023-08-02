@@ -49,22 +49,6 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
-	/*if (ForvardVelocity.Size() < GravityThreshHold)
-	{
-		FVector UnrotatedVector = GetActorRotation().UnrotateVector(GetActorUpVector());
-		float ToLerp = 1.0 - (ForvardVelocity.Size() / GravityThreshHold);
-		UpVelocity = UnrotatedVector * FMath::Lerp(0.f, -980.f, ToLerp);
-	}
-	else
-	{
-		UpVelocity = FMath::VInterpTo(UpVelocity, FVector::ZeroVector, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 20.f);
-	}*/
-	
-	//FVector UnrotatedVector = GetActorRotation().UnrotateVector(GetActorUpVector());
-	//float ToLerp = 1.0 - (ForvardVelocity.Size() / GravityThreshHold);
-	////UpVelocity = UnrotatedVector * FMath::Lerp(0.f, -980.f, ToLerp);
-
 	if (HasAuthority() && !IsLocallyControlled())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *ForvardVelocity.ToString());
@@ -88,6 +72,7 @@ void ASkyFlyJetPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("Roll", this, &ASkyFlyJetPawn::Roll);
 
 	PlayerInputComponent->BindAction("OnBulletFire", IE_Pressed, this, &ASkyFlyJetPawn::OnBulletFire);
+	PlayerInputComponent->BindAction("ChangeMode", IE_Pressed, this, &ASkyFlyJetPawn::ChangeMode);
 }
 
 void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -170,21 +155,39 @@ void ASkyFlyJetPawn::OnBulletFire()
 
 		if (World != NULL)
 		{
-			ASkyShiftBullet* Bullet = World->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
-
-
-			FVector NewVelocity = GetActorForwardVector() * 5000.f;
-
-			DrawDebugLine(GetWorld(), GetActorLocation(), GetActorForwardVector() * 5000.f, FColor::Emerald, true, -1, 0, 10);
-
-			Bullet->SetVelocity(NewVelocity);
-
-			if (!HasAuthority())
+			if (!bInPowerMode)
 			{
-				Server_OnBulletFire(SpawnLocation, SpawnRotation, GetActorForwardVector() * 5000.f);
+				ASkyShiftBullet* Bullet = World->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
+
+
+				FVector NewVelocity = GetActorForwardVector() * 5000.f;
+
+				//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorForwardVector() * 5000.f, FColor::Emerald, true, -1, 0, 10);
+
+				Bullet->SetVelocity(NewVelocity);
+
+				if (!HasAuthority())
+				{
+					Server_OnBulletFire(SpawnLocation, SpawnRotation, GetActorForwardVector() * 5000.f);
+				}
+			}
+			else
+			{
+				ASkyShiftLaser* Laser = World->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation);
+				Laser->LaserParticles->SetBeamSourcePoint(0, JetMesh->GetComponentLocation(), 0);
+
+				if (!HasAuthority())
+				{
+					Server_OnLaserFire(SpawnLocation, SpawnRotation);
+				}
 			}
 		}
 	}
+}
+
+void ASkyFlyJetPawn::ChangeMode()
+{
+	bInPowerMode = !bInPowerMode;
 }
 
 bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
@@ -229,6 +232,17 @@ bool ASkyFlyJetPawn::Server_SetLinearVelocity_Validate(FVector NewVelocity)
 void ASkyFlyJetPawn::Server_SetLinearVelocity_Implementation(FVector NewVelocity)
 {
 	ForvardVelocity = NewVelocity;
+}
+
+bool ASkyFlyJetPawn::Server_OnLaserFire_Validate(FVector SpawnLocation, FRotator SpawnRotation)
+{
+	return true;
+}
+
+void ASkyFlyJetPawn::Server_OnLaserFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation)
+{
+	ASkyShiftLaser* Laser = GetWorld()->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation);
+	Laser->LaserParticles->SetBeamSourcePoint(0, JetMesh->GetComponentLocation(), 0);
 }
 
 //bool ASkyFlyJetPawn::Server_SetTransformation_Validate(FTransform NewTransform)
