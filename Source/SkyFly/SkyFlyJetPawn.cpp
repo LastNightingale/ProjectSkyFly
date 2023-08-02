@@ -114,32 +114,47 @@ void ASkyFlyJetPawn::JetThrust(float value)
 
 void ASkyFlyJetPawn::MoveUp(float value)
 {
-	JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -20.f, NAME_None, true);	
-
 	if (!HasAuthority())
 	{
 		Server_SetRotation(GetActorRightVector(), value * -20.f);
 	}
+	else
+	{
+		if (IsLocallyControlled())
+		{
+			JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -20.f, NAME_None, true);
+		}
+	}
 }
 
 void ASkyFlyJetPawn::MoveRight(float value)
-{
-	JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 20.f, NAME_None, true);
-
-	//JetMesh->SetPhysicsAngularVelocity(FVector(0.f, 0.f, value * 5.f), true);
+{	
 	if (!HasAuthority())
 	{
 		Server_SetRotation(GetActorUpVector(), value * 20.f);
+	}
+	else
+	{
+		if (IsLocallyControlled())
+		{
+			JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 20.f, NAME_None, true);
+		}
 	}
 }
 
 void ASkyFlyJetPawn::Roll(float value)
 {
-	JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 20.f, NAME_None, true);
 
 	if (!HasAuthority())
 	{
 		Server_SetRotation(GetActorForwardVector(), value * 20.f);
+	}
+	else
+	{
+		if (IsLocallyControlled())
+		{
+			JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 20.f, NAME_None, true);
+		}
 	}
 }
 
