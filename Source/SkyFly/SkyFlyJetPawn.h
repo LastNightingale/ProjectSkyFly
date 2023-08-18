@@ -11,6 +11,8 @@
 #include "GameFramework/FloatingPawnMovement.h"
 #include "SkyFlyJetPawn.generated.h"
 
+//class ASkyShiftLaser;
+
 UCLASS()
 class SKYFLY_API ASkyFlyJetPawn : public APawn
 {
@@ -38,8 +40,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float MaxThrust = 5000.f;	
 
-	UPROPERTY(EditAnywhere, Category = "Shooting")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
 	bool bInPowerMode = false;
+
+	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
+	bool bOnLaserFire = false;
+
+	UPROPERTY(EditAnywhere, Category = "Shooting")
+	float LaserPower = 5000.f;
 
 	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
 	FVector ForvardVelocity = FVector(0.f);	
@@ -49,6 +57,26 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Shooting")
 	TSubclassOf<ASkyShiftLaser> LaserClass;
+
+	UPROPERTY(EditAnywhere, Category = "Laser")
+	class UParticleSystem* LaserParticleClass;
+
+	UPROPERTY(EditAnywhere, Category = "Laser")
+	class UParticleSystem* LaserHitParticleClass;
+
+	//ASkyShiftLaser* PlayerLaser = nullptr;
+
+	UPROPERTY(Replicated)
+	UParticleSystemComponent* Laser = nullptr;
+
+	UPROPERTY(Replicated)
+	bool bIsLaserSpawned = false;
+
+	UPROPERTY(Replicated)
+	UParticleSystemComponent* LaserHit = nullptr;
+
+	UPROPERTY(Replicated)
+	bool bIsLaserHitSpawned = false;
 
 protected:
 	// Called when the game starts or when spawned
@@ -81,15 +109,16 @@ public:
 	UFUNCTION()
 	void ChangeMode();
 
+	UFUNCTION()
+	void SpawnLaser();
+
+	UFUNCTION()
+	void DestroyLaser();
+
 	UFUNCTION(Server, unreliable, WithValidation)
 	void Server_OnBulletFire(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 	bool Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 	void Server_OnBulletFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
-
-	UFUNCTION(Server, reliable, WithValidation)
-	void Server_SetLocation(FVector NewLocation);
-	bool Server_SetLocation_Validate(FVector NewLocation);
-	void Server_SetLocation_Implementation(FVector NewLocation);
 
 	UFUNCTION(Server, unreliable, WithValidation)
 	void Server_SetRotation(FVector Direction, float value);
@@ -105,4 +134,5 @@ public:
 	void Server_OnLaserFire(FVector SpawnLocation, FRotator SpawnRotation);
 	bool Server_OnLaserFire_Validate(FVector SpawnLocation, FRotator SpawnRotation);
 	void Server_OnLaserFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation);
+
 };

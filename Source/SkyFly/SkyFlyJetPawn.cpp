@@ -54,8 +54,14 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 		UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *ForvardVelocity.ToString());
 		UE_LOG(LogTemp, Warning, TEXT("Vector: %f"), Thrust);
 	}
+	
 
 	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);	
+
+	if (bOnLaserFire)
+		SpawnLaser();
+	else if (Laser != nullptr)
+		DestroyLaser();
 	
 	//MovingComponent->AddInputVector(ForvardVelocity, true);
 	/*AddMovementInput(ForvardVelocity);*/
@@ -81,6 +87,11 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
 	DOREPLIFETIME(ASkyFlyJetPawn, ForvardVelocity);
+	/*DOREPLIFETIME(ASkyFlyJetPawn, Laser);
+	DOREPLIFETIME(ASkyFlyJetPawn, LaserHit);*/
+	DOREPLIFETIME(ASkyFlyJetPawn, bOnLaserFire);
+	/*DOREPLIFETIME(ASkyFlyJetPawn, bIsLaserSpawned);
+	DOREPLIFETIME(ASkyFlyJetPawn, bIsLaserHitSpawned);*/
 }
 
 void ASkyFlyJetPawn::JetThrust(float value)
@@ -131,7 +142,7 @@ void ASkyFlyJetPawn::Roll(float value)
 {
 
 	if (!HasAuthority())
-	{
+	{		
 		Server_SetRotation(GetActorForwardVector(), value * 20.f);
 	}
 	else
@@ -173,13 +184,25 @@ void ASkyFlyJetPawn::OnBulletFire()
 			}
 			else
 			{
-				ASkyShiftLaser* Laser = World->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation);
-				Laser->LaserParticles->SetBeamSourcePoint(0, JetMesh->GetComponentLocation(), 0);
+				//if (PlayerLaser == nullptr)
+				//{
+				//	const FAttachmentTransformRules AttachmentTransformRules = FAttachmentTransformRules(EAttachmentRule::KeepRelative, true);
+				//	PlayerLaser = World->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation);
+				//	PlayerLaser->LaserParticles->SetBeamSourcePoint(0, JetMesh->GetComponentLocation(), 0);
+				//	PlayerLaser->AttachToComponent(GetRootComponent(), AttachmentTransformRules);
+				//	//PlayerLaser->Owner = this;
+				//}	
+				//else
+				//{
+				//	PlayerLaser->Destroy();
+				//	PlayerLaser = nullptr;
+				//}
 
 				if (!HasAuthority())
 				{
 					Server_OnLaserFire(SpawnLocation, SpawnRotation);
 				}
+				bOnLaserFire = !bOnLaserFire;
 			}
 		}
 	}
@@ -188,6 +211,61 @@ void ASkyFlyJetPawn::OnBulletFire()
 void ASkyFlyJetPawn::ChangeMode()
 {
 	bInPowerMode = !bInPowerMode;
+}
+
+void ASkyFlyJetPawn::SpawnLaser()
+{
+	if (!bIsLaserSpawned)
+	{
+		Laser = UGameplayStatics::SpawnEmitterAttached(LaserParticleClass, JetMesh);
+		bIsLaserSpawned = true;
+		Laser->SetIsReplicated(true);
+	}
+		
+	Laser->SetBeamSourcePoint(0, GetActorLocation(), 0);
+
+	FHitResult HitResult;
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, GetActorLocation(), 
+		GetActorLocation() + GetActorForwardVector() * LaserPower, ECollisionChannel::ECC_Visibility))
+	{
+		//Laser->SetVisibility(true);
+		//Laser->SetWorldLocation(HitResult.Location);
+		
+		Laser->SetBeamEndPoint(0, HitResult.Location);
+		if (!bIsLaserHitSpawned)
+		{
+			const FTransform SpawnTransform;
+			LaserHit = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LaserHitParticleClass, SpawnTransform);
+			bIsLaserHitSpawned = true;
+			LaserHit->SetIsReplicated(true);
+		}
+		LaserHit->SetVisibility(true);
+		LaserHit->SetWorldLocation(HitResult.Location);
+	}
+	else
+	{
+		//Laser->SetBeamSourcePoint(0, GetActorLocation(), 0);
+		Laser->SetBeamEndPoint(0, GetActorLocation() + GetActorForwardVector() * LaserPower);
+		if (LaserHit != nullptr)
+		{
+			LaserHit->SetVisibility(false);
+		}
+	}
+
+	
+}
+
+void ASkyFlyJetPawn::DestroyLaser()
+{
+	bIsLaserSpawned = false;
+	Laser->DestroyComponent();
+	Laser = nullptr;
+	if (LaserHit != nullptr)
+	{
+		LaserHit->DestroyComponent();
+		LaserHit = nullptr;
+		bIsLaserHitSpawned = false;
+	}
 }
 
 bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
@@ -201,17 +279,6 @@ void ASkyFlyJetPawn::Server_OnBulletFire_Implementation(FVector SpawnLocation, F
 
 
 	Bullet->SetVelocity(Direction);
-}
-
-bool ASkyFlyJetPawn::Server_SetLocation_Validate(FVector NewLocation)
-{
-	return true;
-}
-
-void ASkyFlyJetPawn::Server_SetLocation_Implementation(FVector NewLocation)
-{
-	SetActorLocation(NewLocation);
-	/*JetMesh->SetPhysicsLinearVelocity(NewLocation);*/
 }
 
 bool ASkyFlyJetPawn::Server_SetRotation_Validate(FVector Direction, float value)
@@ -241,19 +308,20 @@ bool ASkyFlyJetPawn::Server_OnLaserFire_Validate(FVector SpawnLocation, FRotator
 
 void ASkyFlyJetPawn::Server_OnLaserFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation)
 {
-	ASkyShiftLaser* Laser = GetWorld()->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation);
-	Laser->LaserParticles->SetBeamSourcePoint(0, JetMesh->GetComponentLocation(), 0);
+	//if (PlayerLaser == nullptr)
+	//{
+	//	PlayerLaser = GetWorld()->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation);
+	//	PlayerLaser->LaserParticles->SetBeamSourcePoint(0, JetMesh->GetComponentLocation(), 0);
+	//	//PlayerLaser->Owner = this;
+	//}
+	//else
+	//{
+	//	PlayerLaser->Destroy();
+	//	PlayerLaser = nullptr;
+	//}
+	bOnLaserFire = !bOnLaserFire;
 }
 
-//bool ASkyFlyJetPawn::Server_SetTransformation_Validate(FTransform NewTransform)
-//{
-//	return true;
-//}
-//
-//void ASkyFlyJetPawn::Server_SetTransformation_Implementation(FTransform NewTransform)
-//{
-//	SetActorTransform(NewTransform);
-//}
 
 
 

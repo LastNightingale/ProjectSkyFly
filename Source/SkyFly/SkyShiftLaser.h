@@ -7,6 +7,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "SkyShiftLaser.generated.h"
 
+
 UCLASS()
 class SKYFLY_API ASkyShiftLaser : public AActor
 {
@@ -25,6 +26,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 
+	/*UPROPERTY(EditAnywhere, Category = "Components")
+	UParticleSystemComponent* LaserParticles;*/
+
+	UPROPERTY(EditAnywhere, Category = "Laser")
+	class UParticleSystem* LaserParticleClass;
+
 	UPROPERTY(EditAnywhere, Category = "Components")
-	UParticleSystemComponent* LaserParticles;
+	UStaticMeshComponent* Base;
 };
