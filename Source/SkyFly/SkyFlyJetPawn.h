@@ -43,7 +43,7 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
 	bool bInPowerMode = false;
 
-	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
+	UPROPERTY(ReplicatedUsing = HandleLaser, EditAnywhere, Category = "Shooting")
 	bool bOnLaserFire = false;
 
 	UPROPERTY(EditAnywhere, Category = "Shooting")
@@ -52,7 +52,7 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
 	uint8 Ammo = 10;
 
-	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
+	UPROPERTY(ReplicatedUsing = HandleLaser, EditAnywhere, Category = "Shooting")
 	float Power = 100.f;
 
 	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
@@ -63,32 +63,35 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
 	FVector ForvardVelocity = FVector(0.f);	
 
-	UPROPERTY(EditAnywhere, Category = "Shooting")
+	UPROPERTY(EditAnywhere, Category = "Weapons")
 	TSubclassOf<ASkyShiftBullet> BulletClass;
 
-	UPROPERTY(EditAnywhere, Category = "Shooting")
+	UPROPERTY(EditAnywhere, Category = "Weapons")
 	TSubclassOf<ASkyShiftLaser> LaserClass;
 
-	UPROPERTY(EditAnywhere, Category = "Laser")
+	/*UPROPERTY(EditAnywhere, Category = "Laser")
 	class UParticleSystem* LaserParticleClass;
 
 	UPROPERTY(EditAnywhere, Category = "Laser")
-	class UParticleSystem* LaserHitParticleClass;
+	class UParticleSystem* LaserHitParticleClass;*/
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetBP[2];
 
+	/*UPROPERTY(Replicated)
+	UParticleSystemComponent* Laser = nullptr;*/
+	
 	UPROPERTY(Replicated)
-	UParticleSystemComponent* Laser = nullptr;
+	ASkyShiftLaser* Laser = nullptr;
 
-	UPROPERTY(Replicated)
+	/*UPROPERTY(Replicated)
 	bool bIsLaserSpawned = false;
 
 	UPROPERTY(Replicated)
 	UParticleSystemComponent* LaserHit = nullptr;
 
 	UPROPERTY(Replicated)
-	bool bIsLaserHitSpawned = false;
+	bool bIsLaserHitSpawned = false;*/
 
 protected:
 	// Called when the game starts or when spawned
@@ -143,9 +146,9 @@ public:
 	void Server_SetLinearVelocity_Implementation(FVector NewVelocity);
 	
 	UFUNCTION(Server, unreliable, WithValidation)
-	void Server_OnLaserFire(FVector SpawnLocation, FRotator SpawnRotation);
-	bool Server_OnLaserFire_Validate(FVector SpawnLocation, FRotator SpawnRotation);
-	void Server_OnLaserFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation);
+	void Server_OnLaserFire();
+	bool Server_OnLaserFire_Validate();
+	void Server_OnLaserFire_Implementation();
 
 	UFUNCTION()
 	void PowerWithdraw();
@@ -164,6 +167,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Counter")
 	bool GetPowerMode();
+
+	UFUNCTION()
+	void HandleLaser();
 };
 
 

@@ -53,17 +53,18 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 
 	if (HasAuthority() && !IsLocallyControlled())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *ForvardVelocity.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("Vector: %f"), Thrust);
+		/*UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *ForvardVelocity.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Vector: %f"), Thrust);*/
 	}
 	
 
 	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);	
 
-	if (bOnLaserFire && Power > 0.f)
+	/*if (bOnLaserFire && Power > 0.f)
 		SpawnLaser();
 	else if (Laser != nullptr)
-		DestroyLaser();
+		DestroyLaser();*/
+	
 	
 	
 }
@@ -91,8 +92,8 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASkyFlyJetPawn, Ammo);
 	DOREPLIFETIME(ASkyFlyJetPawn, Power);
 	DOREPLIFETIME(ASkyFlyJetPawn, bOnLaserFire);
-	/*DOREPLIFETIME(ASkyFlyJetPawn, bIsLaserSpawned);
-	DOREPLIFETIME(ASkyFlyJetPawn, bIsLaserHitSpawned);*/
+	//DOREPLIFETIME(ASkyFlyJetPawn, Laser);
+	DOREPLIFETIME(ASkyFlyJetPawn, bInPowerMode);
 }
 
 void ASkyFlyJetPawn::JetThrust(float value)
@@ -100,9 +101,9 @@ void ASkyFlyJetPawn::JetThrust(float value)
 	if (!FMath::IsNearlyZero(value))
 	{
 		float Res = FMath::Lerp(-MaxThrust, MaxThrust, (value + 1.f) / 2.f);
-		UE_LOG(LogTemp, Warning, TEXT("Lerp: %f"), Res);
+		/*UE_LOG(LogTemp, Warning, TEXT("Lerp: %f"), Res);*/
 		Thrust = FMath::FInterpTo(Thrust, Res, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 0.25);
-		UE_LOG(LogTemp, Warning, TEXT("Thrust: %f"), Thrust);
+		/*UE_LOG(LogTemp, Warning, TEXT("Thrust: %f"), Thrust);*/
 	}
 	ForvardVelocity = GetActorForwardVector() * Thrust;
 
@@ -196,9 +197,10 @@ void ASkyFlyJetPawn::OnBulletFire()
 				{
 					if (!HasAuthority())
 					{
-						Server_OnLaserFire(SpawnLocation, SpawnRotation);
+						Server_OnLaserFire();
 					}
 					bOnLaserFire = !bOnLaserFire;
+					HandleLaser();
 				}				
 			}
 		}
@@ -208,6 +210,10 @@ void ASkyFlyJetPawn::OnBulletFire()
 void ASkyFlyJetPawn::ChangeMode()
 {
 	UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
+	if (!HasAuthority() && bOnLaserFire)
+	{
+		Server_OnLaserFire();
+	}
 	bInPowerMode = !bInPowerMode;
 	if (bOnLaserFire) bOnLaserFire = !bOnLaserFire;
 	UUserWidget* CurrentWidget = nullptr;
@@ -215,66 +221,93 @@ void ASkyFlyJetPawn::ChangeMode()
 	else CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOn]);
 	CurrentWidget->AddToViewport();
 	UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));
+	HandleLaser();	
 	//UWidgetBlueprintLibrary::SetInputMode_UIOnly(BirdPlayer, PauseWidget);
 
 }
 
 void ASkyFlyJetPawn::SpawnLaser()
 {
-	if (!bIsLaserSpawned)
+	//if (!bIsLaserSpawned)
+	//{
+	//	Laser = UGameplayStatics::SpawnEmitterAttached(LaserParticleClass, JetMesh);
+	//	bIsLaserSpawned = true;
+	//	Laser->SetIsReplicated(true);	
+	//	GetWorldTimerManager().SetTimer(LaserTimerHandle, this, &ASkyFlyJetPawn::PowerWithdraw, 0.1f, true, 0.f);
+	//}
+	//	
+	//Laser->SetBeamSourcePoint(0, GetActorLocation(), 0);
+
+	//FHitResult HitResult;
+	//if (GetWorld()->LineTraceSingleByChannel(HitResult, GetActorLocation(), 
+	//	GetActorLocation() + GetActorForwardVector() * LaserPower, ECollisionChannel::ECC_Visibility))
+	//{
+	//	//Laser->SetVisibility(true);
+	//	//Laser->SetWorldLocation(HitResult.Location);
+	//	
+	//	Laser->SetBeamEndPoint(0, HitResult.Location);
+	//	if (!bIsLaserHitSpawned)
+	//	{
+	//		const FTransform SpawnTransform;
+	//		LaserHit = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LaserHitParticleClass, SpawnTransform);
+	//		bIsLaserHitSpawned = true;
+	//		LaserHit->SetIsReplicated(true);
+	//	}
+	//	LaserHit->SetVisibility(true);
+	//	LaserHit->SetWorldLocation(HitResult.Location);
+	//}
+	//else
+	//{
+	//	//Laser->SetBeamSourcePoint(0, GetActorLocation(), 0);
+	//	Laser->SetBeamEndPoint(0, GetActorLocation() + GetActorForwardVector() * LaserPower);
+	//	if (LaserHit != nullptr)
+	//	{
+	//		LaserHit->SetVisibility(false);
+	//	}
+	//}
+	if (Laser == nullptr)
 	{
-		Laser = UGameplayStatics::SpawnEmitterAttached(LaserParticleClass, JetMesh);
-		bIsLaserSpawned = true;
-		Laser->SetIsReplicated(true);	
+		const FRotator SpawnRotation = GetControlRotation();
+
+		const FVector SpawnLocation = JetMesh->K2_GetComponentLocation();
+
+		Laser = GetWorld()->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation);
+
+		Laser->Base = JetMesh;
+
+		Laser->SpawnLaser();
+
 		GetWorldTimerManager().SetTimer(LaserTimerHandle, this, &ASkyFlyJetPawn::PowerWithdraw, 0.1f, true, 0.f);
-	}
-		
-	Laser->SetBeamSourcePoint(0, GetActorLocation(), 0);
 
-	FHitResult HitResult;
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, GetActorLocation(), 
-		GetActorLocation() + GetActorForwardVector() * LaserPower, ECollisionChannel::ECC_Visibility))
-	{
-		//Laser->SetVisibility(true);
-		//Laser->SetWorldLocation(HitResult.Location);
-		
-		Laser->SetBeamEndPoint(0, HitResult.Location);
-		if (!bIsLaserHitSpawned)
-		{
-			const FTransform SpawnTransform;
-			LaserHit = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LaserHitParticleClass, SpawnTransform);
-			bIsLaserHitSpawned = true;
-			LaserHit->SetIsReplicated(true);
-		}
-		LaserHit->SetVisibility(true);
-		LaserHit->SetWorldLocation(HitResult.Location);
 	}
-	else
-	{
-		//Laser->SetBeamSourcePoint(0, GetActorLocation(), 0);
-		Laser->SetBeamEndPoint(0, GetActorLocation() + GetActorForwardVector() * LaserPower);
-		if (LaserHit != nullptr)
-		{
-			LaserHit->SetVisibility(false);
-		}
-	}
-
 	
-	//PowerWithdraw();
 }
 
 void ASkyFlyJetPawn::DestroyLaser()
 {
-	GetWorldTimerManager().ClearTimer(LaserTimerHandle);
-	bIsLaserSpawned = false;
-	Laser->DestroyComponent();
-	Laser = nullptr;
-	if (LaserHit != nullptr)
+	/*if (!HasAuthority() && !IsLocallyControlled())
 	{
-		LaserHit->DestroyComponent();
-		LaserHit = nullptr;
-		bIsLaserHitSpawned = false;
-	}
+		UE_LOG(LogTemp, Warning, TEXT("LaserTriedDestroyed"));
+		UE_LOG(LogTemp, Warning, TEXT("Laser: %d"), (Laser != nullptr));
+	}	*/
+	if (Laser != nullptr)
+	{
+		GetWorldTimerManager().ClearTimer(LaserTimerHandle);
+		//bIsLaserSpawned = false;
+		//Laser->DestroyComponent();
+		Laser->DestroyLaser();
+		Laser->Destroy();
+		Laser = nullptr;
+
+		/*if(!HasAuthority() && !IsLocallyControlled())
+		UE_LOG(LogTemp, Warning, TEXT("LaserDestroyed"));*/
+		/*if (LaserHit != nullptr)
+		{
+			LaserHit->DestroyComponent();
+			LaserHit = nullptr;
+			bIsLaserHitSpawned = false;
+		}*/
+	}	
 }
 
 bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
@@ -310,30 +343,21 @@ void ASkyFlyJetPawn::Server_SetLinearVelocity_Implementation(FVector NewVelocity
 	ForvardVelocity = NewVelocity;
 }
 
-bool ASkyFlyJetPawn::Server_OnLaserFire_Validate(FVector SpawnLocation, FRotator SpawnRotation)
+bool ASkyFlyJetPawn::Server_OnLaserFire_Validate()
 {
 	return true;
 }
 
-void ASkyFlyJetPawn::Server_OnLaserFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation)
-{
-	//if (PlayerLaser == nullptr)
-	//{
-	//	PlayerLaser = GetWorld()->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation);
-	//	PlayerLaser->LaserParticles->SetBeamSourcePoint(0, JetMesh->GetComponentLocation(), 0);
-	//	//PlayerLaser->Owner = this;
-	//}
-	//else
-	//{
-	//	PlayerLaser->Destroy();
-	//	PlayerLaser = nullptr;
-	//}
+void ASkyFlyJetPawn::Server_OnLaserFire_Implementation()
+{	
 	bOnLaserFire = !bOnLaserFire;
+	HandleLaser();
 }
 
 void ASkyFlyJetPawn::PowerWithdraw()
 {
 	Power -= 1.5;
+	HandleLaser();
 }
 
 void ASkyFlyJetPawn::BulletWithdraw()
@@ -359,6 +383,13 @@ uint8 ASkyFlyJetPawn::GetAmmo()
 bool ASkyFlyJetPawn::GetPowerMode()
 {
 	return bInPowerMode;
+}
+
+void ASkyFlyJetPawn::HandleLaser()
+{
+	if (bOnLaserFire && Power > 0.f)
+		SpawnLaser();
+	else DestroyLaser();
 }
 
 

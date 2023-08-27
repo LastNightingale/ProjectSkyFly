@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "SkyShiftLaser.generated.h"
 
 
@@ -25,8 +26,25 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
+	UPROPERTY(EditAnywhere, Category = "Particles")
+	class UParticleSystem* LaserParticleClass;
 
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(EditAnywhere, Category = "Particles")
+	class UParticleSystem* LaserHitParticleClass;
+		
 	UStaticMeshComponent* Base;
+
+	UPROPERTY(Replicated)
+	UParticleSystemComponent* Laser = nullptr;
+
+	UPROPERTY(Replicated)
+	UParticleSystemComponent* LaserHit = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Power")
+	float LaserPower = 5000.f;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void SpawnLaser();
+	void DestroyLaser();
 };
