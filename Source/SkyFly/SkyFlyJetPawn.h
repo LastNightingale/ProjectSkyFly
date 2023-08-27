@@ -7,7 +7,7 @@
 #include "SkyShiftLaser.h"
 #include "GameFramework/Pawn.h"
 #include "Net/UnrealNetwork.h"
-//#include "UObject/CoreNet.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "SkyFlyJetPawn.generated.h"
 
@@ -49,6 +49,17 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Shooting")
 	float LaserPower = 5000.f;
 
+	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
+	uint8 Ammo = 10;
+
+	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
+	float Power = 100.f;
+
+	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
+	float MaxPower = 100.f;
+
+	FTimerHandle LaserTimerHandle;
+
 	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
 	FVector ForvardVelocity = FVector(0.f);	
 
@@ -64,7 +75,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Laser")
 	class UParticleSystem* LaserHitParticleClass;
 
-	//ASkyShiftLaser* PlayerLaser = nullptr;
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> WidgetBP[2];
 
 	UPROPERTY(Replicated)
 	UParticleSystemComponent* Laser = nullptr;
@@ -135,4 +147,28 @@ public:
 	bool Server_OnLaserFire_Validate(FVector SpawnLocation, FRotator SpawnRotation);
 	void Server_OnLaserFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation);
 
+	UFUNCTION()
+	void PowerWithdraw();
+
+	UFUNCTION()
+	void BulletWithdraw();
+
+	UFUNCTION(BlueprintPure, Category = "Counter")
+	float GetPower();
+
+	UFUNCTION(BlueprintPure, Category = "Counter")
+	float GetMaxPower();
+
+	UFUNCTION(BlueprintPure, Category = "Counter")
+	uint8 GetAmmo();
+
+	UFUNCTION(BlueprintPure, Category = "Counter")
+	bool GetPowerMode();
+};
+
+
+enum UIMode
+{
+	UI_PowerOff = 0,
+	UI_PowerOn = 1
 };

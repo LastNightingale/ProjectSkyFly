@@ -25,12 +25,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
-	/*UPROPERTY(EditAnywhere, Category = "Components")
-	UParticleSystemComponent* LaserParticles;*/
-
-	UPROPERTY(EditAnywhere, Category = "Laser")
-	class UParticleSystem* LaserParticleClass;
+	
 
 	UPROPERTY(EditAnywhere, Category = "Components")
 	UStaticMeshComponent* Base;

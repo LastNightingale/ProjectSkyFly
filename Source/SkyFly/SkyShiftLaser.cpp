@@ -10,9 +10,7 @@ ASkyShiftLaser::ASkyShiftLaser()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Base = CreateDefaultSubobject<UStaticMeshComponent>("Base");
-
-	//LaserParticles->SetBeamSourcePoint(0, Owner->GetActorLocation(), 0);
+	
 
 	
 }
@@ -29,11 +27,7 @@ void ASkyShiftLaser::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//LaserParticles->SetBeamSourcePoint(0, Owner->GetActorLocation(), 0);
-
-	UParticleSystemComponent* LaserParticle = UGameplayStatics::SpawnEmitterAttached(LaserParticleClass, Base);
-
-	LaserParticle->SetBeamSourcePoint(0, FVector(0.f, 0.f, 0.f), 0);
+	
 
 }
 
