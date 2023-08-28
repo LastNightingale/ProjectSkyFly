@@ -76,7 +76,7 @@ public:
 	class UParticleSystem* LaserHitParticleClass;*/
 
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> WidgetBP[2];
+	TSubclassOf<UUserWidget> WidgetBP[3];
 
 	/*UPROPERTY(Replicated)
 	UParticleSystemComponent* Laser = nullptr;*/
@@ -130,6 +130,9 @@ public:
 	UFUNCTION()
 	void DestroyLaser();
 
+	UFUNCTION()
+	void OnPause();
+
 	UFUNCTION(Server, unreliable, WithValidation)
 	void Server_OnBulletFire(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 	bool Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
@@ -176,5 +179,6 @@ public:
 enum UIMode
 {
 	UI_PowerOff = 0,
-	UI_PowerOn = 1
+	UI_PowerOn = 1,
+	UI_PauseMenu = 2
 };

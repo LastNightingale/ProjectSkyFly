@@ -35,6 +35,7 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 
 	Thrust = MaxThrust / 2.f;
 
+	
 	/*bUseControllerRotationYaw = true;
 	bUseControllerRotationPitch = true;*/
 }
@@ -43,6 +44,10 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 void ASkyFlyJetPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOff])->AddToViewport();
+	UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));
+
 	
 }
 
@@ -81,6 +86,7 @@ void ASkyFlyJetPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("OnBulletFire", IE_Pressed, this, &ASkyFlyJetPawn::OnBulletFire);
 	PlayerInputComponent->BindAction("ChangeMode", IE_Pressed, this, &ASkyFlyJetPawn::ChangeMode);
+	PlayerInputComponent->BindAction("Pause", IE_Pressed, this, &ASkyFlyJetPawn::OnPause);
 }
 
 void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -92,7 +98,6 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASkyFlyJetPawn, Ammo);
 	DOREPLIFETIME(ASkyFlyJetPawn, Power);
 	DOREPLIFETIME(ASkyFlyJetPawn, bOnLaserFire);
-	//DOREPLIFETIME(ASkyFlyJetPawn, Laser);
 	DOREPLIFETIME(ASkyFlyJetPawn, bInPowerMode);
 }
 
@@ -222,49 +227,11 @@ void ASkyFlyJetPawn::ChangeMode()
 	CurrentWidget->AddToViewport();
 	UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));
 	HandleLaser();	
-	//UWidgetBlueprintLibrary::SetInputMode_UIOnly(BirdPlayer, PauseWidget);
 
 }
 
 void ASkyFlyJetPawn::SpawnLaser()
-{
-	//if (!bIsLaserSpawned)
-	//{
-	//	Laser = UGameplayStatics::SpawnEmitterAttached(LaserParticleClass, JetMesh);
-	//	bIsLaserSpawned = true;
-	//	Laser->SetIsReplicated(true);	
-	//	GetWorldTimerManager().SetTimer(LaserTimerHandle, this, &ASkyFlyJetPawn::PowerWithdraw, 0.1f, true, 0.f);
-	//}
-	//	
-	//Laser->SetBeamSourcePoint(0, GetActorLocation(), 0);
-
-	//FHitResult HitResult;
-	//if (GetWorld()->LineTraceSingleByChannel(HitResult, GetActorLocation(), 
-	//	GetActorLocation() + GetActorForwardVector() * LaserPower, ECollisionChannel::ECC_Visibility))
-	//{
-	//	//Laser->SetVisibility(true);
-	//	//Laser->SetWorldLocation(HitResult.Location);
-	//	
-	//	Laser->SetBeamEndPoint(0, HitResult.Location);
-	//	if (!bIsLaserHitSpawned)
-	//	{
-	//		const FTransform SpawnTransform;
-	//		LaserHit = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LaserHitParticleClass, SpawnTransform);
-	//		bIsLaserHitSpawned = true;
-	//		LaserHit->SetIsReplicated(true);
-	//	}
-	//	LaserHit->SetVisibility(true);
-	//	LaserHit->SetWorldLocation(HitResult.Location);
-	//}
-	//else
-	//{
-	//	//Laser->SetBeamSourcePoint(0, GetActorLocation(), 0);
-	//	Laser->SetBeamEndPoint(0, GetActorLocation() + GetActorForwardVector() * LaserPower);
-	//	if (LaserHit != nullptr)
-	//	{
-	//		LaserHit->SetVisibility(false);
-	//	}
-	//}
+{	
 	if (Laser == nullptr)
 	{
 		const FRotator SpawnRotation = GetControlRotation();
@@ -293,21 +260,29 @@ void ASkyFlyJetPawn::DestroyLaser()
 	if (Laser != nullptr)
 	{
 		GetWorldTimerManager().ClearTimer(LaserTimerHandle);
-		//bIsLaserSpawned = false;
-		//Laser->DestroyComponent();
 		Laser->DestroyLaser();
 		Laser->Destroy();
 		Laser = nullptr;
 
 		/*if(!HasAuthority() && !IsLocallyControlled())
-		UE_LOG(LogTemp, Warning, TEXT("LaserDestroyed"));*/
-		/*if (LaserHit != nullptr)
-		{
-			LaserHit->DestroyComponent();
-			LaserHit = nullptr;
-			bIsLaserHitSpawned = false;
-		}*/
+		UE_LOG(LogTemp, Warning, TEXT("LaserDestroyed"));*/		
 	}	
+}
+
+void ASkyFlyJetPawn::OnPause()
+{
+	if (WidgetBP[UIMode::UI_PauseMenu] != nullptr)
+	{
+		UUserWidget* PauseWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PauseMenu]);
+
+		if (PauseWidget != nullptr)
+		{
+			PauseWidget->AddToViewport();
+			APlayerController* JetPlayer = UGameplayStatics::GetPlayerController(this, 0);
+			JetPlayer->SetShowMouseCursor(true);
+			UWidgetBlueprintLibrary::SetInputMode_UIOnly(JetPlayer, PauseWidget);
+		}
+	}
 }
 
 bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
