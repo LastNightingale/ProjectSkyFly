@@ -7,11 +7,36 @@
 #include "SkyShiftLaser.h"
 #include "GameFramework/Pawn.h"
 #include "Net/UnrealNetwork.h"
+#include "Containers/EnumAsByte.h"
 #include "Blueprint/UserWidget.h"
+#include "SkyFlyHUD.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "SkyFlyJetPawn.generated.h"
 
 //class ASkyShiftLaser;
+
+enum UIMode
+{
+	/*UI_PowerOff = 0,
+	UI_PowerOn = 1,*/
+	UI_PauseMenu = 0
+};
+
+
+UENUM()
+enum LaserState
+{
+	FireOff = 0 UMETA(DisplayName = "FireOff"),
+	FireOn = 1 UMETA(DisplayName = "FireOn")
+};
+
+UENUM()
+enum PowerMode
+{
+	Off = 0 UMETA(DisplayName = "Off"),
+	On = 1 UMETA(DisplayName = "On")
+};
+
 
 UCLASS()
 class SKYFLY_API ASkyFlyJetPawn : public APawn
@@ -40,11 +65,17 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float MaxThrust = 5000.f;	
 
-	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
+	/*UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
 	bool bInPowerMode = false;
 
 	UPROPERTY(ReplicatedUsing = HandleLaser, EditAnywhere, Category = "Shooting")
-	bool bOnLaserFire = false;
+	bool bOnLaserFire = false;*/
+
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Shooting")
+	TEnumAsByte<PowerMode> CurrentPowerMode = PowerMode::Off;
+
+	UPROPERTY(ReplicatedUsing = HandleLaser, EditDefaultsOnly, Category = "Shooting")
+	TEnumAsByte <LaserState> CurrentLaserState = LaserState::FireOff;
 
 	UPROPERTY(EditAnywhere, Category = "Shooting")
 	float LaserPower = 5000.f;
@@ -67,31 +98,15 @@ public:
 	TSubclassOf<ASkyShiftBullet> BulletClass;
 
 	UPROPERTY(EditAnywhere, Category = "Weapons")
-	TSubclassOf<ASkyShiftLaser> LaserClass;
-
-	/*UPROPERTY(EditAnywhere, Category = "Laser")
-	class UParticleSystem* LaserParticleClass;
-
-	UPROPERTY(EditAnywhere, Category = "Laser")
-	class UParticleSystem* LaserHitParticleClass;*/
+	TSubclassOf<ASkyShiftLaser> LaserClass;	
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetBP[3];
-
-	/*UPROPERTY(Replicated)
-	UParticleSystemComponent* Laser = nullptr;*/
-	
+		
 	UPROPERTY(Replicated)
-	ASkyShiftLaser* Laser = nullptr;
+	ASkyShiftLaser* Laser = nullptr;	
 
-	/*UPROPERTY(Replicated)
-	bool bIsLaserSpawned = false;
-
-	UPROPERTY(Replicated)
-	UParticleSystemComponent* LaserHit = nullptr;
-
-	UPROPERTY(Replicated)
-	bool bIsLaserHitSpawned = false;*/
+	ASkyFlyHUD* PlayerHUD = nullptr;
 
 protected:
 	// Called when the game starts or when spawned
@@ -169,16 +184,12 @@ public:
 	uint8 GetAmmo();
 
 	UFUNCTION(BlueprintPure, Category = "Counter")
-	bool GetPowerMode();
+	TEnumAsByte<PowerMode> GetPowerMode();
 
 	UFUNCTION()
 	void HandleLaser();
 };
 
 
-enum UIMode
-{
-	UI_PowerOff = 0,
-	UI_PowerOn = 1,
-	UI_PauseMenu = 2
-};
+
+

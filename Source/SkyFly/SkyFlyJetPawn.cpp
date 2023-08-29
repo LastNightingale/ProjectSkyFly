@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "SkyFlyHUD.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
@@ -33,6 +34,8 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 	//Camera->SetRelativeLocation(FVector(0.f, 0.f, -100.f));
 
 	Thrust = MaxThrust / 2.f;	
+
+	
 	
 }
 
@@ -41,10 +44,10 @@ void ASkyFlyJetPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOff])->AddToViewport();
-	UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));
-
 	
+	/*CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOff])->AddToViewport();
+	UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));*/
+
 }
 
 // Called every frame
@@ -93,8 +96,8 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASkyFlyJetPawn, ForvardVelocity);
 	DOREPLIFETIME(ASkyFlyJetPawn, Ammo);
 	DOREPLIFETIME(ASkyFlyJetPawn, Power);
-	DOREPLIFETIME(ASkyFlyJetPawn, bOnLaserFire);
-	DOREPLIFETIME(ASkyFlyJetPawn, bInPowerMode);
+	DOREPLIFETIME(ASkyFlyJetPawn, CurrentLaserState);
+	DOREPLIFETIME(ASkyFlyJetPawn, CurrentPowerMode);
 }
 
 void ASkyFlyJetPawn::JetThrust(float value)
@@ -160,7 +163,7 @@ void ASkyFlyJetPawn::OnBulletFire()
 		
 	}*/
 
-	if (!bInPowerMode)
+	if (!CurrentPowerMode)
 	{
 		if (Ammo > 0 && BulletClass)
 		{
@@ -196,7 +199,8 @@ void ASkyFlyJetPawn::OnBulletFire()
 			{
 				Server_OnLaserFire();
 			}
-			bOnLaserFire = !bOnLaserFire;
+			//bOnLaserFire = !bOnLaserFire;
+			CurrentLaserState = (CurrentLaserState == LaserState::FireOff ? LaserState::FireOn : LaserState::FireOff);
 			HandleLaser();
 		}
 	}
@@ -204,20 +208,23 @@ void ASkyFlyJetPawn::OnBulletFire()
 
 void ASkyFlyJetPawn::ChangeMode()
 {
-	UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld()); //убрать інший юай з екрана
-	if (!HasAuthority() && bOnLaserFire) //якщо лазер увімкнений на клієнті при переході в режим куль вирубити лазер
+	//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld()); //убрать інший юай з екрана
+	if (!HasAuthority() && CurrentLaserState) //якщо лазер увімкнений на клієнті при переході в режим куль вирубити лазер
 	{
 		Server_OnLaserFire();
 	}
-	bInPowerMode = !bInPowerMode; //перемкнути режим
-	if (bOnLaserFire) bOnLaserFire = !bOnLaserFire; //і вирубити лазер
-	UUserWidget* CurrentWidget = nullptr;     //створення і додання нового юая
-	if(!bInPowerMode) 
-		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOff]);
-	else 
-		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOn]);
-	CurrentWidget->AddToViewport();
-	UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));
+	CurrentPowerMode = (CurrentPowerMode == PowerMode::Off ? PowerMode::On : PowerMode::Off); //перемкнути режим
+	if (CurrentLaserState)
+		CurrentLaserState = LaserState::FireOff; //і вирубити лазер
+	//UUserWidget* CurrentWidget = nullptr;     //створення і додання нового юая
+	//if(!CurrentPowerMode)
+	//	CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOff]);
+	//else 
+	//	CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOn]);
+	//CurrentWidget->AddToViewport();
+	//UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));	
+	//PlayerHUD = Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD());
+	Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD())->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);
 	HandleLaser();	//якщо лазер увімкнений вирубити
 
 }
@@ -259,10 +266,10 @@ void ASkyFlyJetPawn::DestroyLaser()
 
 void ASkyFlyJetPawn::OnPause()
 {
-	if (!WidgetBP[UIMode::UI_PauseMenu])
+	/*if (!WidgetBP[UIMode::UI_PauseMenu])
 		return;
 
-	UUserWidget* PauseWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PauseMenu]);
+	UUserWidget* PauseWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[2]);
 
 	if (!PauseWidget)
 		return;
@@ -270,7 +277,11 @@ void ASkyFlyJetPawn::OnPause()
 	PauseWidget->AddToViewport();
 	APlayerController* JetPlayer = UGameplayStatics::GetPlayerController(this, 0);
 	JetPlayer->SetShowMouseCursor(true);
-	UWidgetBlueprintLibrary::SetInputMode_UIOnly(JetPlayer, PauseWidget);
+	UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(JetPlayer, PauseWidget);*/
+	/*if (!PlayerHUD)
+		return;*/
+	
+	Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD())->SetUI(UIMode::UI_PauseMenu);
 }
 
 bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
@@ -313,7 +324,7 @@ bool ASkyFlyJetPawn::Server_OnLaserFire_Validate()
 
 void ASkyFlyJetPawn::Server_OnLaserFire_Implementation()
 {	
-	bOnLaserFire = !bOnLaserFire;
+	CurrentLaserState = (CurrentLaserState == LaserState::FireOff ? LaserState::FireOn : LaserState::FireOff);
 	HandleLaser();
 }
 
@@ -343,14 +354,14 @@ uint8 ASkyFlyJetPawn::GetAmmo()
 	return Ammo;
 }
 
-bool ASkyFlyJetPawn::GetPowerMode()
+TEnumAsByte<PowerMode> ASkyFlyJetPawn::GetPowerMode()
 {
-	return bInPowerMode;
+	return CurrentPowerMode;
 }
 
 void ASkyFlyJetPawn::HandleLaser()
 {
-	if (bOnLaserFire && Power > 0.f)
+	if (CurrentLaserState && Power > 0.f)
 		SpawnLaser();
 	else DestroyLaser();
 }
