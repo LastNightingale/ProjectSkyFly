@@ -34,7 +34,7 @@ void ASkyShiftLaser::Tick(float DeltaTime)
 	{	
 
 		Laser->SetBeamEndPoint(0, HitResult.Location);
-		if (LaserHit == nullptr)
+		if (!LaserHit)
 		{
 			const FTransform SpawnTransform;
 			LaserHit = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LaserHitParticleClass, SpawnTransform);
@@ -46,7 +46,7 @@ void ASkyShiftLaser::Tick(float DeltaTime)
 	else
 	{		
 		Laser->SetBeamEndPoint(0, Base->GetComponentLocation() + Base->GetForwardVector() * LaserPower);
-		if (LaserHit != nullptr)
+		if (LaserHit)
 		{
 			LaserHit->SetVisibility(false);
 		}
@@ -70,8 +70,10 @@ void ASkyShiftLaser::SpawnLaser()
 
 void ASkyShiftLaser::DestroyLaser()
 {
-	if (LaserHit != nullptr) LaserHit->DestroyComponent();
-	if (Laser != nullptr) Laser->DestroyComponent();
+	if (LaserHit) 
+		LaserHit->DestroyComponent();
+	if (Laser) 
+		Laser->DestroyComponent();
 }
 
 
