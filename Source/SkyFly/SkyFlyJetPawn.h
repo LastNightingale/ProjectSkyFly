@@ -54,10 +54,7 @@ public:
 	class USpringArmComponent* SpringArm;
 
 	UPROPERTY(EditAnywhere, Category = "Components")
-	class UCameraComponent* Camera;
-
-	UPROPERTY(EditAnywhere, Category = "Components")
-	class UFloatingPawnMovement* MovingComponent;
+	class UCameraComponent* Camera;	
 
 	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
 	float Thrust = 0.f;
@@ -65,11 +62,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float MaxThrust = 5000.f;	
 
-	/*UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
-	bool bInPowerMode = false;
+	UPROPERTY(Replicated, EditAnywhere, Category = "Health")
+	float Health = 100.f;
 
-	UPROPERTY(ReplicatedUsing = HandleLaser, EditAnywhere, Category = "Shooting")
-	bool bOnLaserFire = false;*/
+	UPROPERTY(EditAnywhere, Category = "Health")
+	float MaxHealth = 100.f;
+	
 
 	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Shooting")
 	TEnumAsByte<PowerMode> CurrentPowerMode = PowerMode::Off;
@@ -100,8 +98,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weapons")
 	TSubclassOf<ASkyShiftLaser> LaserClass;	
 
-	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> WidgetBP[3];
+	/*UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> WidgetBP[3];*/
 		
 	UPROPERTY(Replicated)
 	ASkyShiftLaser* Laser = nullptr;	
@@ -188,6 +186,12 @@ public:
 
 	UFUNCTION()
 	void HandleLaser();
+
+	UFUNCTION(BlueprintPure, Category = "Counter")
+	float GetHealth();
+
+	UFUNCTION(BlueprintPure, Category = "Counter")
+	float GetMaxHealth();
 };
 
 

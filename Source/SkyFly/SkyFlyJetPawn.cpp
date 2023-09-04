@@ -21,7 +21,7 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 	JetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Jet Mesh"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Arm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	MovingComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Movement Component"));
+	//MovingComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Movement Component"));
 
 	SetRootComponent(JetMesh);
 
@@ -48,6 +48,9 @@ void ASkyFlyJetPawn::BeginPlay()
 	/*CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOff])->AddToViewport();
 	UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));*/
 
+
+	if(GetController<APlayerController>())
+	PlayerHUD = GetController<APlayerController>()->GetHUD<ASkyFlyHUD>();
 }
 
 // Called every frame
@@ -224,8 +227,17 @@ void ASkyFlyJetPawn::ChangeMode()
 	//CurrentWidget->AddToViewport();
 	//UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));	
 	//PlayerHUD = Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD());
-	Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD())->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);
+
+	//Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD())->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);
+
+
+	
 	HandleLaser();	//якщо лазер увімкнений вирубити
+
+	if (!PlayerHUD)
+		return;
+
+	PlayerHUD->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);
 
 }
 
@@ -281,7 +293,12 @@ void ASkyFlyJetPawn::OnPause()
 	/*if (!PlayerHUD)
 		return;*/
 	
-	Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD())->SetUI(UIMode::UI_PauseMenu);
+	//Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD())->SetUI(UIMode::UI_PauseMenu);
+	if (!PlayerHUD)
+		return;
+
+	PlayerHUD->SetUI(UIMode::UI_PauseMenu);
+	//GetController<APlayerController>()->GetHUD<ASkyFlyHUD>()->SetUI(UIMode::UI_PauseMenu);
 }
 
 bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
@@ -364,6 +381,16 @@ void ASkyFlyJetPawn::HandleLaser()
 	if (CurrentLaserState && Power > 0.f)
 		SpawnLaser();
 	else DestroyLaser();
+}
+
+float ASkyFlyJetPawn::GetHealth()
+{
+	return Health;
+}
+
+float ASkyFlyJetPawn::GetMaxHealth()
+{
+	return MaxHealth;
 }
 
 
