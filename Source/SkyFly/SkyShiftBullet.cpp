@@ -16,6 +16,8 @@ ASkyShiftBullet::ASkyShiftBullet()
 	
 	BulletMovement->InitialSpeed = 5000.f;
 	BulletMovement->MaxSpeed = 10000.f;
+
+	SetRootComponent(BulletMesh);
 }
 
 // Called when the game starts or when spawned
@@ -36,4 +38,6 @@ void ASkyShiftBullet::SetVelocity(FVector NewVelocity)
 {
 	BulletMovement->Velocity = NewVelocity;
 }
+
+
 

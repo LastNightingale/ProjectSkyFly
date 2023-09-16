@@ -35,7 +35,8 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 
 	Thrust = MaxThrust / 2.f;	
 
-	
+	GunOffset = FVector(150.0f, 0.0f, 0.0f);
+	//JetMesh->OnComponent.AddDynamic(this, &ASkyFlyJetPawn::OnHit);
 	
 }
 
@@ -48,9 +49,11 @@ void ASkyFlyJetPawn::BeginPlay()
 	/*CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOff])->AddToViewport();
 	UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));*/
 
-
 	if(GetController<APlayerController>())
 	PlayerHUD = GetController<APlayerController>()->GetHUD<ASkyFlyHUD>();
+
+	JetMesh->OnComponentBeginOverlap.AddDynamic(this, &ASkyFlyJetPawn::OnKillZoneEnter);
+	JetMesh->OnComponentHit.AddDynamic(this, &ASkyFlyJetPawn::OnHit);
 }
 
 // Called every frame
@@ -99,6 +102,7 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASkyFlyJetPawn, ForvardVelocity);
 	DOREPLIFETIME(ASkyFlyJetPawn, Ammo);
 	DOREPLIFETIME(ASkyFlyJetPawn, Power);
+	DOREPLIFETIME(ASkyFlyJetPawn, Health);
 	DOREPLIFETIME(ASkyFlyJetPawn, CurrentLaserState);
 	DOREPLIFETIME(ASkyFlyJetPawn, CurrentPowerMode);
 }
@@ -174,10 +178,15 @@ void ASkyFlyJetPawn::OnBulletFire()
 
 			const FVector SpawnLocation = JetMesh->GetComponentLocation();
 
-			ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
+			ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation + /*SpawnRotation.RotateVector(GunOffset)*/ 
+				GetActorForwardVector() * 100.f, SpawnRotation);
 
 			if (!Bullet)
 				return;
+
+			Bullet->SetOwner(this);
+			Bullet->BulletMesh->MoveIgnoreActors.Add(GetInstigator());
+			Bullet->BulletMesh->MoveIgnoreActors.Add(this);
 
 			FVector NewVelocity = GetActorForwardVector() * 5000.f;
 
@@ -250,7 +259,10 @@ void ASkyFlyJetPawn::SpawnLaser()
 
 	const FVector SpawnLocation = JetMesh->GetComponentLocation();
 
-	Laser = GetWorld()->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation);
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = this;
+
+	Laser = GetWorld()->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation, SpawnParameters);
 
 	Laser->Base = JetMesh;
 
@@ -310,6 +322,10 @@ void ASkyFlyJetPawn::Server_OnBulletFire_Implementation(FVector SpawnLocation, F
 {
 	ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
 
+	Bullet->SetOwner(this);
+	Bullet->BulletMesh->MoveIgnoreActors.Add(GetOwner());
+	Bullet->BulletMesh->MoveIgnoreActors.Add(GetInstigator());
+	
 
 	Bullet->SetVelocity(Direction);
 }
@@ -391,6 +407,40 @@ float ASkyFlyJetPawn::GetHealth()
 float ASkyFlyJetPawn::GetMaxHealth()
 {
 	return MaxHealth;
+}
+
+float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if (Health > DamageAmount)
+		Health = Health - DamageAmount;
+	else 
+		Health = 0.f;
+	return DamageAmount;
+}
+
+void ASkyFlyJetPawn::OnKillZoneEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	FDamageEvent DamageEvent;
+	if (ASkyShiftLaser* LaserCollided = Cast<ASkyShiftLaser>(OtherActor))
+	{
+		if(LaserCollided->GetOwner() != this)
+			this->TakeDamage(LaserCollided->DamagePerTick, DamageEvent, LaserCollided->GetInstigatorController(), LaserCollided);
+		//UE_LOG(LogTemp, Warning, TEXT("BulletTime"));
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Why Don't You Work("));
+}
+
+void ASkyFlyJetPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	FDamageEvent DamageEvent;
+	if (ASkyShiftBullet* Bullet = Cast<ASkyShiftBullet>(OtherActor))
+	{
+		this->TakeDamage(Bullet->Damage, DamageEvent, Bullet->GetInstigatorController(), Bullet);
+		//UE_LOG(LogTemp, Warning, TEXT("BulletTime"));
+	}		
+	//else
+		//UE_LOG(LogTemp, Warning, TEXT("LaserTime"));
 }
 
 

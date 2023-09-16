@@ -36,4 +36,11 @@ public:
 	UFUNCTION()
 	void SetVelocity(FVector NewVelocity);
 
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float Damage = 10.f;
+
+	
+	
+
+
 };

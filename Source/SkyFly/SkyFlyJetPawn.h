@@ -75,27 +75,27 @@ public:
 	UPROPERTY(ReplicatedUsing = HandleLaser, EditDefaultsOnly, Category = "Shooting")
 	TEnumAsByte <LaserState> CurrentLaserState = LaserState::FireOff;
 
-	UPROPERTY(EditAnywhere, Category = "Shooting")
+	UPROPERTY(EditDefaultsOnly, Category = "Shooting")
 	float LaserPower = 5000.f;
 
-	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Shooting")
 	uint8 Ammo = 10;
 
-	UPROPERTY(ReplicatedUsing = HandleLaser, EditAnywhere, Category = "Shooting")
+	UPROPERTY(ReplicatedUsing = HandleLaser, EditDefaultsOnly, Category = "Shooting")
 	float Power = 100.f;
 
-	UPROPERTY(Replicated, EditAnywhere, Category = "Shooting")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Shooting")
 	float MaxPower = 100.f;
 
-	FTimerHandle LaserTimerHandle;
+	FTimerHandle LaserTimerHandle;	
 
-	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Movement")
 	FVector ForvardVelocity = FVector(0.f);	
 
-	UPROPERTY(EditAnywhere, Category = "Weapons")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	TSubclassOf<ASkyShiftBullet> BulletClass;
 
-	UPROPERTY(EditAnywhere, Category = "Weapons")
+	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	TSubclassOf<ASkyShiftLaser> LaserClass;	
 
 	/*UPROPERTY(EditAnywhere, Category = "UI")
@@ -103,6 +103,9 @@ public:
 		
 	UPROPERTY(Replicated)
 	ASkyShiftLaser* Laser = nullptr;	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
+	FVector GunOffset;
 
 	ASkyFlyHUD* PlayerHUD = nullptr;
 
@@ -192,6 +195,15 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Counter")
 	float GetMaxHealth();
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	UFUNCTION()
+	void OnKillZoneEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+		void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 };
 
 

@@ -7,11 +7,17 @@
 ASkyShiftLaser::ASkyShiftLaser()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;	
 
-	
+	BaseScene = CreateDefaultSubobject<USceneComponent>(TEXT("BaseComponent"));
+	LaserHitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("HitBox"));
+	LaserHitBox->bHiddenInGame = false;	
 
-	
+	SetRootComponent(BaseScene);
+	LaserHitBox->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	LaserHitBox->OnComponentBeginOverlap.AddDynamic(this, &ASkyShiftLaser::OnLaserBeginOverlap);
+	LaserHitBox->OnComponentEndOverlap.AddDynamic(this, &ASkyShiftLaser::OnLaserEndOverlap);
 }
 
 // Called when the game starts or when spawned
@@ -32,8 +38,8 @@ void ASkyShiftLaser::Tick(float DeltaTime)
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, Base->GetComponentLocation(),
 		Base->GetComponentLocation() + Base->GetForwardVector() * LaserPower, ECollisionChannel::ECC_Visibility))
 	{	
-
-		Laser->SetBeamEndPoint(0, HitResult.Location);
+		EndLocation = HitResult.Location;
+		//Laser->SetBeamEndPoint(0, HitResult.Location);
 		if (!LaserHit)
 		{
 			const FTransform SpawnTransform;
@@ -44,13 +50,26 @@ void ASkyShiftLaser::Tick(float DeltaTime)
 		LaserHit->SetWorldLocation(HitResult.Location);
 	}
 	else
-	{		
-		Laser->SetBeamEndPoint(0, Base->GetComponentLocation() + Base->GetForwardVector() * LaserPower);
+	{	
+		EndLocation = Base->GetComponentLocation() + Base->GetForwardVector() * LaserPower;
+		//Laser->SetBeamEndPoint(0, Base->GetComponentLocation() + Base->GetForwardVector() * LaserPower);
 		if (LaserHit)
 		{
 			LaserHit->SetVisibility(false);
 		}
 	}
+
+	Laser->SetBeamEndPoint(0, EndLocation);
+
+	FVector Location = (EndLocation - Base->GetComponentLocation()) / 2.f + Base->GetComponentLocation();
+	FRotator Rotation = Base->GetComponentRotation();
+	FVector Scale = (LaserHit && LaserHit->IsVisible() ? FVector(FVector::Dist(Base->GetComponentLocation(), EndLocation) / 2.f, 10.f, 10.f)
+		: FVector(LaserPower / 2.f, 10.f, 10.f));
+	
+
+	SetCollisionBox(Location,
+		Rotation,
+		Scale);
 
 }
 
@@ -65,7 +84,9 @@ void ASkyShiftLaser::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 void ASkyShiftLaser::SpawnLaser()
 {
 	Laser = UGameplayStatics::SpawnEmitterAttached(LaserParticleClass, Base);
-	Laser->SetIsReplicated(true);
+	Laser->SetIsReplicated(true);	
+	/*SetCollisionBox(Base->GetComponentLocation() + Base->GetComponentRotation().RotateVector({ LaserPower / 2.f, 0.f, 0.f }), 
+		Base->GetComponentRotation(), { LaserPower, 10.f, 10.f });*/
 }
 
 void ASkyShiftLaser::DestroyLaser()
@@ -74,6 +95,37 @@ void ASkyShiftLaser::DestroyLaser()
 		LaserHit->DestroyComponent();
 	if (Laser) 
 		Laser->DestroyComponent();
+}
+
+void ASkyShiftLaser::SetCollisionBox(FVector LocationVector, FRotator RotationRotator, FVector ScaleVector)
+{
+	LaserHitBox->SetWorldRotation(RotationRotator);
+	LaserHitBox->SetBoxExtent(ScaleVector);	
+	LaserHitBox->SetWorldLocation(LocationVector);
+}
+
+void ASkyShiftLaser::OnLaserBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (Cast<APawn>(OtherActor) && OtherActor != this->GetOwner())
+	{
+		if (OtherActor != this->GetOwner())
+		{
+			PlayerToHit = OtherActor;
+			Hit = SweepResult;
+			GetWorldTimerManager().SetTimer(LaserDamageHandle, this, &ASkyShiftLaser::ApplyLaserDamage, 0.1f, true, 0.0f);
+		}
+	}
+}
+
+void ASkyShiftLaser::OnLaserEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	GetWorldTimerManager().ClearTimer(LaserDamageHandle);
+
+}
+
+void ASkyShiftLaser::ApplyLaserDamage()
+{
+	UGameplayStatics::ApplyPointDamage(PlayerToHit, DamagePerTick, GetActorLocation(), Hit, nullptr, this, LaserDamage);
 }
 
 
