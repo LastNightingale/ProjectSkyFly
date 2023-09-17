@@ -179,7 +179,7 @@ void ASkyFlyJetPawn::OnBulletFire()
 			const FVector SpawnLocation = JetMesh->GetComponentLocation();
 
 			ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation + /*SpawnRotation.RotateVector(GunOffset)*/ 
-				GetActorForwardVector() * 100.f, SpawnRotation);
+				GetActorForwardVector() * 150.f, SpawnRotation);
 
 			if (!Bullet)
 				return;
@@ -437,6 +437,7 @@ void ASkyFlyJetPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor
 	if (ASkyShiftBullet* Bullet = Cast<ASkyShiftBullet>(OtherActor))
 	{
 		this->TakeDamage(Bullet->Damage, DamageEvent, Bullet->GetInstigatorController(), Bullet);
+		Bullet->Destroy();
 		//UE_LOG(LogTemp, Warning, TEXT("BulletTime"));
 	}		
 	//else

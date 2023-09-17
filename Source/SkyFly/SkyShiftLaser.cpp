@@ -119,7 +119,13 @@ void ASkyShiftLaser::OnLaserBeginOverlap(UPrimitiveComponent* OverlappedComponen
 
 void ASkyShiftLaser::OnLaserEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	GetWorldTimerManager().ClearTimer(LaserDamageHandle);
+	if (Cast<APawn>(OtherActor) && OtherActor != this->GetOwner())
+	{
+		if (OtherActor != this->GetOwner())
+		{
+			GetWorldTimerManager().ClearTimer(LaserDamageHandle);
+		}
+	}
 
 }
 
