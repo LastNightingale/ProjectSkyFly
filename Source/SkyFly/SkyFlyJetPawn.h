@@ -7,6 +7,7 @@
 #include "SkyShiftLaser.h"
 #include "GameFramework/Pawn.h"
 #include "Net/UnrealNetwork.h"
+#include "Components/SphereComponent.h"
 #include "Containers/EnumAsByte.h"
 #include "Blueprint/UserWidget.h"
 #include "SkyFlyHUD.h"
@@ -56,11 +57,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Components")
 	class UCameraComponent* Camera;	
 
+	UPROPERTY(EditAnywhere, Category = "Components")
+	class USphereComponent* SpawnPoint;
+
 	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
 	float Thrust = 0.f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float MaxThrust = 5000.f;	
+	float MaxThrust = 2500.f;	
 
 	UPROPERTY(Replicated, EditAnywhere, Category = "Health")
 	float Health = 100.f;
@@ -121,6 +125,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;	
+
+	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, 
+		bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
 	UFUNCTION()
 	void JetThrust(float value);

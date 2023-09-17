@@ -32,11 +32,12 @@ void ASkyShiftLaser::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);	
 
-	Laser->SetBeamSourcePoint(0, Base->GetComponentLocation(), 0);
+	Laser->SetBeamSourcePoint(0, /*Base->GetComponentLocation()*/GetOwner()->GetActorLocation(), 0);
 
 	FHitResult HitResult;
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Base->GetComponentLocation(),
-		Base->GetComponentLocation() + Base->GetForwardVector() * LaserPower, ECollisionChannel::ECC_Visibility))
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, /*Base->GetComponentLocation()*/ GetOwner()->GetActorLocation(),
+		/*Base->GetComponentLocation()*/GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector().RotateAngleAxis(35.f, GetOwner()->GetActorRightVector()) * LaserPower,
+		ECollisionChannel::ECC_Visibility))
 	{	
 		EndLocation = HitResult.Location;
 		//Laser->SetBeamEndPoint(0, HitResult.Location);
@@ -47,11 +48,11 @@ void ASkyShiftLaser::Tick(float DeltaTime)
 			LaserHit->SetIsReplicated(true);
 		}
 		LaserHit->SetVisibility(true);
-		LaserHit->SetWorldLocation(HitResult.Location);
+		LaserHit->SetWorldLocation(HitResult.Location);		
 	}
 	else
 	{	
-		EndLocation = Base->GetComponentLocation() + Base->GetForwardVector() * LaserPower;
+		EndLocation = /*Base->GetComponentLocation()*/GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector().RotateAngleAxis(35.f, GetOwner()->GetActorRightVector()) * LaserPower;
 		//Laser->SetBeamEndPoint(0, Base->GetComponentLocation() + Base->GetForwardVector() * LaserPower);
 		if (LaserHit)
 		{
@@ -61,9 +62,11 @@ void ASkyShiftLaser::Tick(float DeltaTime)
 
 	Laser->SetBeamEndPoint(0, EndLocation);
 
-	FVector Location = (EndLocation - Base->GetComponentLocation()) / 2.f + Base->GetComponentLocation();
-	FRotator Rotation = Base->GetComponentRotation();
-	FVector Scale = (LaserHit && LaserHit->IsVisible() ? FVector(FVector::Dist(Base->GetComponentLocation(), EndLocation) / 2.f, 10.f, 10.f)
+	FVector BaseVector = EndLocation - /*Base->GetComponentLocation()*/GetOwner()->GetActorLocation();
+
+	FVector Location = BaseVector / 2.f + /*Base->GetComponentLocation()*/GetOwner()->GetActorLocation();
+	FRotator Rotation = /*Base->GetComponentRotation() + FRotator(-35.f, 0.f, -35.f);*/ BaseVector.Rotation();
+	FVector Scale = (LaserHit && LaserHit->IsVisible() ? FVector(FVector::Dist(/*Base->GetComponentLocation()*/GetOwner()->GetActorLocation(), EndLocation) / 2.f, 10.f, 10.f)
 		: FVector(LaserPower / 2.f, 10.f, 10.f));
 	
 

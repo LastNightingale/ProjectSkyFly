@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/BoxComponent.h"
+#include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
 #include "SkyShiftLaser.generated.h"
 
@@ -33,7 +34,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Particles")
 	class UParticleSystem* LaserHitParticleClass;
 		
-	UStaticMeshComponent* Base;
+	UPrimitiveComponent* Base;
 
 	UPROPERTY(Replicated)
 	UParticleSystemComponent* Laser = nullptr;

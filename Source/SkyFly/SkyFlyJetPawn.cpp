@@ -21,22 +21,29 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 	JetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Jet Mesh"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Arm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	SpawnPoint = CreateDefaultSubobject<USphereComponent>(TEXT("Spawn Point"));
 	//MovingComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Movement Component"));
 
 	SetRootComponent(JetMesh);
 
 	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = 500.f;
-	SpringArm->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
+	SpringArm->TargetArmLength = 200.0f;
+	//SpringArm->TargetArmLength = 500.f;
+	//SpringArm->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
+	SpringArm->SocketOffset = FVector(0.f, 0.f, 100.f);
 	
 
 	Camera->SetupAttachment(SpringArm);
 	//Camera->SetRelativeLocation(FVector(0.f, 0.f, -100.f));
 
+	SpawnPoint->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	SpawnPoint->SetRelativeLocation({ 0.f, 0.f, 0.f });
+
 	Thrust = MaxThrust / 2.f;	
 
-	GunOffset = FVector(150.0f, 0.0f, 0.0f);
+	GunOffset = FVector(25.0f, 0.0f, -25.0f);
 	//JetMesh->OnComponent.AddDynamic(this, &ASkyFlyJetPawn::OnHit);
+	
 	
 }
 
@@ -105,6 +112,15 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASkyFlyJetPawn, Health);
 	DOREPLIFETIME(ASkyFlyJetPawn, CurrentLaserState);
 	DOREPLIFETIME(ASkyFlyJetPawn, CurrentPowerMode);
+}
+
+void ASkyFlyJetPawn::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+
+	// Deflect along the surface when we collide.
+	FRotator CurrentRotation = GetActorRotation();
+	SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.012f));
 }
 
 void ASkyFlyJetPawn::JetThrust(float value)
@@ -176,10 +192,13 @@ void ASkyFlyJetPawn::OnBulletFire()
 		{
 			const FRotator SpawnRotation = GetControlRotation();
 
-			const FVector SpawnLocation = JetMesh->GetComponentLocation();
+			const FVector SpawnLocation = SpawnPoint->GetComponentLocation()/* + SpringArm->GetComponentRotation().RotateVector()*/;
 
-			ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation + /*SpawnRotation.RotateVector(GunOffset)*/ 
-				GetActorForwardVector() * 150.f, SpawnRotation);
+			ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation + /*GunOffset.RotateAngleAxis(35.f, GetActorRightVector())*/
+				/*GetActorForwardVector() * 150.f*/ GetActorRotation().RotateVector(GunOffset), SpawnRotation);
+
+			/*DrawDebugLine(GetWorld(), SpawnLocation + GetActorRotation().RotateVector(GunOffset),
+				GetActorForwardVector().RotateAngleAxis(35.f, GetActorRightVector()) * 5000.f, FColor::Emerald, true, -1, 0, 10);*/
 
 			if (!Bullet)
 				return;
@@ -188,7 +207,13 @@ void ASkyFlyJetPawn::OnBulletFire()
 			Bullet->BulletMesh->MoveIgnoreActors.Add(GetInstigator());
 			Bullet->BulletMesh->MoveIgnoreActors.Add(this);
 
-			FVector NewVelocity = GetActorForwardVector() * 5000.f;
+
+			FVector NewVelocity = GetActorForwardVector().RotateAngleAxis(35.f, GetActorRightVector()) * 5000.f;
+			/*FVector NewVelocity = (GetActorForwardVector() - GetActorUpVector());
+
+			NewVelocity.Normalize();
+
+			NewVelocity *= 5000.f;*/
 
 			//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorForwardVector() * 5000.f, FColor::Emerald, true, -1, 0, 10);
 
@@ -257,14 +282,14 @@ void ASkyFlyJetPawn::SpawnLaser()
 
 	const FRotator SpawnRotation = GetControlRotation();
 
-	const FVector SpawnLocation = JetMesh->GetComponentLocation();
+	const FVector SpawnLocation = SpawnPoint->GetComponentLocation();
 
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.Owner = this;
 
 	Laser = GetWorld()->SpawnActor<ASkyShiftLaser>(LaserClass, SpawnLocation, SpawnRotation, SpawnParameters);
 
-	Laser->Base = JetMesh;
+	Laser->Base = SpawnPoint;
 
 	Laser->SpawnLaser();
 
