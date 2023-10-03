@@ -18,14 +18,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	float HealthValue = 10.f;
+	float HealthValue = 10.f;	
 
-	void WasPicked_Implementation() override;
-
-	void RestoreValue() override;
-
-	UFUNCTION()
-		void OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void RestoreValue() override;	
 	
 };

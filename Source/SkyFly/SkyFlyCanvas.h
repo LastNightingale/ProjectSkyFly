@@ -13,15 +13,9 @@ UCLASS()
 class SKYFLY_API USkyFlyCanvas : public UUserWidget
 {
 	GENERATED_BODY()
-public:
-
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	class UProgressBar* HealthBar;
+public:	
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UCanvasPanel* Canvas;
-
-
-	void SetHealth(float CurrentHealth, float MaxHealth);
 	
 };

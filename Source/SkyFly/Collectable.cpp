@@ -24,6 +24,7 @@ void ACollectable::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	BatteryBoundaries->OnComponentBeginOverlap.AddDynamic(this, &ACollectable::OnPlayerBeginOverlap);
 }
 
 // Called every frame
@@ -35,7 +36,8 @@ void ACollectable::Tick(float DeltaTime)
 
 void ACollectable::WasPicked_Implementation()
 {
-	
+	RestoreValue();
+	Destroy();
 }
 
 ASkyFlyJetPawn* ACollectable::GetPickingPawn()
@@ -45,5 +47,14 @@ ASkyFlyJetPawn* ACollectable::GetPickingPawn()
 
 void ACollectable::RestoreValue()
 {
+}
+
+void ACollectable::OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if ((!PickingPawn) && Cast<ASkyFlyJetPawn>(OtherActor))
+	{
+		PickingPawn = Cast<ASkyFlyJetPawn>(OtherActor);
+		WasPicked();
+	}
 }
 

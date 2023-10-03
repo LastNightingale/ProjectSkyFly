@@ -122,35 +122,13 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 	if (IsLocallyControlled())
 	{
 
-		FVector2D outVector;
-		//for (int iterator = 0; iterator < FoundActors.Num(); iterator++)
-		//{
-		//	if (!Cast<ASkyFlyJetPawn>(FoundActors[iterator])->IsLocallyControlled())
-		//	{
-		//		UGameplayStatics::ProjectWorldToScreen(GetController<APlayerController>(),
-		//			FoundActors[iterator]->GetActorLocation(), outVector, false);
-		//		outVector *= FMath::Pow(UWidgetLayoutLibrary::GetViewportScale(GetWorld()), -1);
-		//		UE_LOG(LogTemp, Warning, TEXT("Iterator: %u"), FoundActors.Num());
-		//		check(PlayerWidgets[iterator]);
-		//		check(PlayerWidgets[iterator]->Slot);
-		//		check(Cast<UCanvasPanelSlot>(PlayerWidgets[iterator]->Slot));
-		//		/*UE_LOG(LogTemp, Warning, TEXT("InVector: %s"), *FoundActors[iterator]->GetActorLocation().ToString());
-		//		UE_LOG(LogTemp, Warning, TEXT("OutVector: %s"), *outVector.ToString());*/
-		//		Cast<UCanvasPanelSlot>(PlayerWidgets[iterator]->Slot)->SetPosition(outVector);
-		//	}
-		//	/*UGameplayStatics::ProjectWorldToScreen(GetController<APlayerController>(), GetActorLocation(), outVector, true);
-		//	Cast<UCanvasPanelSlot>(MyHP->Slot)->SetPosition(outVector);*/
-		//}
+		FVector2D outVector;		
 		for (TActorIterator<ASkyFlyJetPawn> It(GetWorld()); It; ++It)
 		{
-			//auto BeginIter = PlayerWidgets.begin();
 			if (!It->IsLocallyControlled())
 			{
-				UGameplayStatics::ProjectWorldToScreen(GetController<APlayerController>(), It->GetActorLocation() + FVector(0.f, 0.f, 30.f), outVector, false);
+				UGameplayStatics::ProjectWorldToScreen(GetController<APlayerController>(), It->GetActorLocation(), outVector, false);
 				outVector *= FMath::Pow(UWidgetLayoutLibrary::GetViewportScale(GetWorld()), -1);
-				//check(It->PlayerHPWidget->Slot);
-				//check(It->PlayerHPWidget);
-				//UE_LOG(LogTemp, Warning, TEXT("Iterator: %u"), FoundActors.Num());
 				if (!It->PlayerHPWidget)
 					return;
 
@@ -162,22 +140,13 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 				{
 					It->PlayerHPWidget->Visibility = ESlateVisibility::Visible;
 					Cast<UCanvasPanelSlot>(It->PlayerHPWidget->Slot)->SetPosition(outVector);
-				}
-					
+				}					
 			}
 		}
 	}
 	
 
-	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);	
-
-	/*if (bOnLaserFire && Power > 0.f)
-		SpawnLaser();
-	else if (Laser != nullptr)
-		DestroyLaser();*/
-	
-	
-	
+	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);		
 }
 
 // Called to bind functionality to input

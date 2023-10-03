@@ -18,13 +18,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	uint8 AmmoValue = 1;
-
-	void WasPicked_Implementation() override;
+	uint8 AmmoValue = 1;	
 
 	void RestoreValue() override;
-
-	UFUNCTION()
-		void OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
 };

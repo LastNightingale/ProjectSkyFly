@@ -31,8 +31,6 @@ public:
 
 protected:
 
-	
-
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -42,11 +40,15 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void WasPicked();
-	virtual void WasPicked_Implementation();
+	void WasPicked_Implementation();
 
 	UFUNCTION(BlueprintPure, Category = "Player")
 	ASkyFlyJetPawn* GetPickingPawn();
 
 	virtual void RestoreValue();
+
+	UFUNCTION()
+	void OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 };
