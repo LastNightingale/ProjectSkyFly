@@ -7,6 +7,7 @@
 #include "SkyShiftLaser.h"
 #include "GameFramework/Pawn.h"
 #include "Net/UnrealNetwork.h"
+#include "EnemyHPWidget.h"
 #include "Components/SphereComponent.h"
 #include "Containers/EnumAsByte.h"
 #include "Blueprint/UserWidget.h"
@@ -60,6 +61,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Components")
 	class USphereComponent* SpawnPoint;
 
+	UPROPERTY(EditAnywhere, Category = "Components")
+	class UWidgetComponent* HealthBarWidget;
+
 	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
 	float Thrust = 0.f;
 
@@ -102,8 +106,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	TSubclassOf<ASkyShiftLaser> LaserClass;	
 
-	/*UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> WidgetBP[3];*/
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> EnemyHPWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class USkyFlyCanvas> PlayerCanvasClass;
+
+	UPROPERTY(EditAnywhere)
+	class USkyFlyCanvas* PlayerCanvas;
 		
 	UPROPERTY(Replicated)
 	ASkyShiftLaser* Laser = nullptr;	
@@ -112,6 +122,15 @@ public:
 	FVector GunOffset;
 
 	ASkyFlyHUD* PlayerHUD = nullptr;
+
+	UUserWidget* MyHP = nullptr;
+
+	UPROPERTY(Replicated)
+	UEnemyHPWidget* PlayerHPWidget = nullptr;
+
+	TArray<AActor*> FoundActors;
+
+	TArray<UUserWidget*> PlayerWidgets;
 
 protected:
 	// Called when the game starts or when spawned
@@ -155,6 +174,12 @@ public:
 
 	UFUNCTION()
 	void OnPause();
+
+	void RestorePower(float Value);
+
+	void RestoreHealth(float Value);
+
+	void RestoreAmmo(uint8 Value);
 
 	UFUNCTION(Server, unreliable, WithValidation)
 	void Server_OnBulletFire(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);

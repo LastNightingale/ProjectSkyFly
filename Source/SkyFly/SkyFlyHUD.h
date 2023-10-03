@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "Components/CanvasPanel.h"
 #include "Components/WidgetSwitcher.h"
 #include "SkyFlyHUD.generated.h"
 
@@ -30,6 +31,10 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> UIWidgets[1];
+
+	/*UUserWidget* CanvasPanelWidget;
+
+	UCanvasPanel* CanvasPanel;*/
 
 	void SetUI(uint8 index);
 };

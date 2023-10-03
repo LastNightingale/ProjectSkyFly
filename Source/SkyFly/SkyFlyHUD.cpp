@@ -14,6 +14,15 @@ void ASkyFlyHUD::BeginPlay()
 	UISwitcher = Cast<UWidgetSwitcher>(Widget->WidgetTree->FindWidget(FName("Switcher")));
 	UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayerController());
 	UISwitcher->SetActiveWidgetIndex(0);
+
+	/*CanvasPanelWidget = CreateWidget<UUserWidget>(GetOwningPlayerController());
+
+	CanvasPanel = CanvasPanelWidget->WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass());*/
+
+	//CanvasPanelWidget->AddToViewport();
+	
+	//Canvas = Cast<UCanvasPanel>(CanvasPanel);
+
 }
 
 void ASkyFlyHUD::SetUI(uint8 index)

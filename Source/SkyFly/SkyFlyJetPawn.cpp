@@ -5,7 +5,11 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "SkyFlyCanvas.h"
+#include "Components/CanvasPanelSlot.h"
+#include "EngineUtils.h"
 #include "SkyFlyHUD.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
@@ -22,6 +26,14 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Arm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	SpawnPoint = CreateDefaultSubobject<USphereComponent>(TEXT("Spawn Point"));
+
+	
+
+	/*if(!PlayerHPWidget)
+	UE_LOG(LogTemp, Warning, TEXT("NotCreated"));*/
+	//check(PlayerHPWidget);
+
+	//HealthBarWidget = CreateWidget(GetController<APlayerController>(), EnemyHPWidget);
 	//MovingComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Movement Component"));
 
 	SetRootComponent(JetMesh);
@@ -43,21 +55,54 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 
 	GunOffset = FVector(25.0f, 0.0f, -25.0f);
 	//JetMesh->OnComponent.AddDynamic(this, &ASkyFlyJetPawn::OnHit);
+
 	
-	
+	PlayerWidgets.Init(nullptr, 2);
 }
 
 // Called when the game starts or when spawned
 void ASkyFlyJetPawn::BeginPlay()
 {
 	Super::BeginPlay();
-
 	
-	/*CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOff])->AddToViewport();
-	UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));*/
+	
+	//check(CreateWidget<UUserWidget>(GetController<APlayerController>(), EnemyHPWidgetClass));
+	//check(GetController<APlayerController>());
+	
+	if (IsLocallyControlled() && PlayerCanvasClass)
+	{
+		APlayerController* PC = GetController<APlayerController>();
+		check(PC);
+		//PlayerHPWidget = (CreateWidget<UEnemyHPWidget>(PC, EnemyHPWidgetClass));
+		PlayerCanvas = CreateWidget<USkyFlyCanvas>(PC, PlayerCanvasClass);
+		check(PlayerCanvas);
+		PlayerCanvas->AddToPlayerScreen();
+
+		/*UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASkyFlyJetPawn::StaticClass(), FoundActors);
+		for (int iterator = 0; iterator < FoundActors.Num(); iterator++)
+		{
+			if (!Cast<ASkyFlyJetPawn>(FoundActors[iterator])->IsLocallyControlled())
+			{
+				PlayerWidgets[iterator] = Cast<ASkyFlyJetPawn>(FoundActors[iterator])->PlayerHPWidget;
+				PlayerCanvas->Canvas->AddChildToCanvas(PlayerWidgets[iterator]);
+			}
+
+		}	*/
+		for (TActorIterator<ASkyFlyJetPawn> It(GetWorld()); It; ++It)
+		{
+			if (!It->IsLocallyControlled())
+			{
+				It->PlayerHPWidget = CreateWidget<UEnemyHPWidget>(PC, EnemyHPWidgetClass);
+				PlayerWidgets.Add(It->PlayerHPWidget);
+				//check(It->PlayerHPWidget);
+				PlayerCanvas->Canvas->AddChildToCanvas(PlayerWidgets.Top());
+			}			
+		}
+	}
 
 	if(GetController<APlayerController>())
-	PlayerHUD = GetController<APlayerController>()->GetHUD<ASkyFlyHUD>();
+	PlayerHUD = GetController<APlayerController>()->GetHUD<ASkyFlyHUD>();		
+	
 
 	JetMesh->OnComponentBeginOverlap.AddDynamic(this, &ASkyFlyJetPawn::OnKillZoneEnter);
 	JetMesh->OnComponentHit.AddDynamic(this, &ASkyFlyJetPawn::OnHit);
@@ -73,6 +118,55 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 	//	/*UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *ForvardVelocity.ToString());
 	//	UE_LOG(LogTemp, Warning, TEXT("Vector: %f"), Thrust);*/
 	//}
+	
+	if (IsLocallyControlled())
+	{
+
+		FVector2D outVector;
+		//for (int iterator = 0; iterator < FoundActors.Num(); iterator++)
+		//{
+		//	if (!Cast<ASkyFlyJetPawn>(FoundActors[iterator])->IsLocallyControlled())
+		//	{
+		//		UGameplayStatics::ProjectWorldToScreen(GetController<APlayerController>(),
+		//			FoundActors[iterator]->GetActorLocation(), outVector, false);
+		//		outVector *= FMath::Pow(UWidgetLayoutLibrary::GetViewportScale(GetWorld()), -1);
+		//		UE_LOG(LogTemp, Warning, TEXT("Iterator: %u"), FoundActors.Num());
+		//		check(PlayerWidgets[iterator]);
+		//		check(PlayerWidgets[iterator]->Slot);
+		//		check(Cast<UCanvasPanelSlot>(PlayerWidgets[iterator]->Slot));
+		//		/*UE_LOG(LogTemp, Warning, TEXT("InVector: %s"), *FoundActors[iterator]->GetActorLocation().ToString());
+		//		UE_LOG(LogTemp, Warning, TEXT("OutVector: %s"), *outVector.ToString());*/
+		//		Cast<UCanvasPanelSlot>(PlayerWidgets[iterator]->Slot)->SetPosition(outVector);
+		//	}
+		//	/*UGameplayStatics::ProjectWorldToScreen(GetController<APlayerController>(), GetActorLocation(), outVector, true);
+		//	Cast<UCanvasPanelSlot>(MyHP->Slot)->SetPosition(outVector);*/
+		//}
+		for (TActorIterator<ASkyFlyJetPawn> It(GetWorld()); It; ++It)
+		{
+			//auto BeginIter = PlayerWidgets.begin();
+			if (!It->IsLocallyControlled())
+			{
+				UGameplayStatics::ProjectWorldToScreen(GetController<APlayerController>(), It->GetActorLocation() + FVector(0.f, 0.f, 30.f), outVector, false);
+				outVector *= FMath::Pow(UWidgetLayoutLibrary::GetViewportScale(GetWorld()), -1);
+				//check(It->PlayerHPWidget->Slot);
+				//check(It->PlayerHPWidget);
+				//UE_LOG(LogTemp, Warning, TEXT("Iterator: %u"), FoundActors.Num());
+				if (!It->PlayerHPWidget)
+					return;
+
+				UE_LOG(LogTemp, Warning, TEXT("OutVector: %s"), *outVector.ToString());
+
+				if (outVector.IsZero())
+					It->PlayerHPWidget->Visibility = ESlateVisibility::Hidden;
+				else
+				{
+					It->PlayerHPWidget->Visibility = ESlateVisibility::Visible;
+					Cast<UCanvasPanelSlot>(It->PlayerHPWidget->Slot)->SetPosition(outVector);
+				}
+					
+			}
+		}
+	}
 	
 
 	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);	
@@ -112,6 +206,7 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASkyFlyJetPawn, Health);
 	DOREPLIFETIME(ASkyFlyJetPawn, CurrentLaserState);
 	DOREPLIFETIME(ASkyFlyJetPawn, CurrentPowerMode);
+	DOREPLIFETIME(ASkyFlyJetPawn, PlayerHPWidget);
 }
 
 void ASkyFlyJetPawn::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
@@ -338,6 +433,30 @@ void ASkyFlyJetPawn::OnPause()
 	//GetController<APlayerController>()->GetHUD<ASkyFlyHUD>()->SetUI(UIMode::UI_PauseMenu);
 }
 
+void ASkyFlyJetPawn::RestorePower(float Value)
+{
+	if (MaxPower - Value > Power)
+		Power += Value;
+	else
+		Power = MaxPower;
+}
+
+void ASkyFlyJetPawn::RestoreHealth(float Value)
+{
+	if (MaxHealth - Value > Health)
+		Health += Value;
+	else
+		Health = MaxHealth;
+}
+
+void ASkyFlyJetPawn::RestoreAmmo(uint8 Value)
+{
+	if (10 - Value > Ammo)
+		Ammo += Value;
+	else
+		Ammo = 10;
+}
+
 bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
 {
 	return true;
@@ -440,6 +559,9 @@ float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		Health = Health - DamageAmount;
 	else 
 		Health = 0.f;
+
+	if(PlayerHPWidget)
+	PlayerHPWidget->SetHealth(Health, MaxHealth);
 	return DamageAmount;
 }
 
@@ -453,7 +575,7 @@ void ASkyFlyJetPawn::OnKillZoneEnter(UPrimitiveComponent* OverlappedComponent, A
 			this->TakeDamage(LaserCollided->DamagePerTick, DamageEvent, LaserCollided->GetInstigatorController(), LaserCollided);
 		//UE_LOG(LogTemp, Warning, TEXT("BulletTime"));
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Why Don't You Work("));
+	//UE_LOG(LogTemp, Warning, TEXT("Why Don't You Work("));
 }
 
 void ASkyFlyJetPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
