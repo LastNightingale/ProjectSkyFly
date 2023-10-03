@@ -18,6 +18,8 @@ ASkyShiftBullet::ASkyShiftBullet()
 	BulletMovement->MaxSpeed = 10000.f;
 
 	SetRootComponent(BulletMesh);
+
+	UE_LOG(LogTemp, Warning, TEXT("BulletSpawned"));
 }
 
 // Called when the game starts or when spawned

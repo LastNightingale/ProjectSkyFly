@@ -181,6 +181,8 @@ public:
 
 	void RestoreAmmo(uint8 Value);
 
+	void SpawnBullet(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
+
 	UFUNCTION(Server, unreliable, WithValidation)
 	void Server_OnBulletFire(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 	bool Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);

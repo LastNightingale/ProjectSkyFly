@@ -27,15 +27,6 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	SpawnPoint = CreateDefaultSubobject<USphereComponent>(TEXT("Spawn Point"));
 
-	
-
-	/*if(!PlayerHPWidget)
-	UE_LOG(LogTemp, Warning, TEXT("NotCreated"));*/
-	//check(PlayerHPWidget);
-
-	//HealthBarWidget = CreateWidget(GetController<APlayerController>(), EnemyHPWidget);
-	//MovingComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Movement Component"));
-
 	SetRootComponent(JetMesh);
 
 	SpringArm->SetupAttachment(RootComponent);
@@ -65,10 +56,6 @@ void ASkyFlyJetPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	
-	//check(CreateWidget<UUserWidget>(GetController<APlayerController>(), EnemyHPWidgetClass));
-	//check(GetController<APlayerController>());
-	
 	if (IsLocallyControlled() && PlayerCanvasClass)
 	{
 		APlayerController* PC = GetController<APlayerController>();
@@ -77,17 +64,7 @@ void ASkyFlyJetPawn::BeginPlay()
 		PlayerCanvas = CreateWidget<USkyFlyCanvas>(PC, PlayerCanvasClass);
 		check(PlayerCanvas);
 		PlayerCanvas->AddToPlayerScreen();
-
-		/*UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASkyFlyJetPawn::StaticClass(), FoundActors);
-		for (int iterator = 0; iterator < FoundActors.Num(); iterator++)
-		{
-			if (!Cast<ASkyFlyJetPawn>(FoundActors[iterator])->IsLocallyControlled())
-			{
-				PlayerWidgets[iterator] = Cast<ASkyFlyJetPawn>(FoundActors[iterator])->PlayerHPWidget;
-				PlayerCanvas->Canvas->AddChildToCanvas(PlayerWidgets[iterator]);
-			}
-
-		}	*/
+		
 		for (TActorIterator<ASkyFlyJetPawn> It(GetWorld()); It; ++It)
 		{
 			if (!It->IsLocallyControlled())
@@ -130,9 +107,9 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 				UGameplayStatics::ProjectWorldToScreen(GetController<APlayerController>(), It->GetActorLocation(), outVector, false);
 				outVector *= FMath::Pow(UWidgetLayoutLibrary::GetViewportScale(GetWorld()), -1);
 				if (!It->PlayerHPWidget)
-					return;
+					continue;
 
-				UE_LOG(LogTemp, Warning, TEXT("OutVector: %s"), *outVector.ToString());
+				//UE_LOG(LogTemp, Warning, TEXT("OutVector: %s"), *outVector.ToString());
 
 				if (outVector.IsZero())
 					It->PlayerHPWidget->Visibility = ESlateVisibility::Hidden;
@@ -140,7 +117,7 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 				{
 					It->PlayerHPWidget->Visibility = ESlateVisibility::Visible;
 					Cast<UCanvasPanelSlot>(It->PlayerHPWidget->Slot)->SetPosition(outVector);
-				}					
+				}			
 			}
 		}
 	}
@@ -240,15 +217,6 @@ void ASkyFlyJetPawn::Roll(float value)
 
 void ASkyFlyJetPawn::OnBulletFire()
 {
-	/*if (!BulletClass)
-		return;*	
-
-	//UWorld* World = GetWorld();
-
-	/*if (World != NULL)
-	{
-		
-	}*/
 
 	if (!CurrentPowerMode)
 	{
@@ -256,41 +224,19 @@ void ASkyFlyJetPawn::OnBulletFire()
 		{
 			const FRotator SpawnRotation = GetControlRotation();
 
-			const FVector SpawnLocation = SpawnPoint->GetComponentLocation()/* + SpringArm->GetComponentRotation().RotateVector()*/;
+			const FVector SpawnLocation = SpawnPoint->GetComponentLocation() + GetActorRotation().RotateVector(GunOffset);
 
-			ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation + /*GunOffset.RotateAngleAxis(35.f, GetActorRightVector())*/
-				/*GetActorForwardVector() * 150.f*/ GetActorRotation().RotateVector(GunOffset), SpawnRotation);
+			FVector Direction = GetActorForwardVector().RotateAngleAxis(35.f, GetActorRightVector()) * 5000.f;
 
-			/*DrawDebugLine(GetWorld(), SpawnLocation + GetActorRotation().RotateVector(GunOffset),
-				GetActorForwardVector().RotateAngleAxis(35.f, GetActorRightVector()) * 5000.f, FColor::Emerald, true, -1, 0, 10);*/
-
-			if (!Bullet)
-				return;
-
-			Bullet->SetOwner(this);
-			Bullet->BulletMesh->MoveIgnoreActors.Add(GetInstigator());
-			Bullet->BulletMesh->MoveIgnoreActors.Add(this);
-
-
-			FVector NewVelocity = GetActorForwardVector().RotateAngleAxis(35.f, GetActorRightVector()) * 5000.f;
-			/*FVector NewVelocity = (GetActorForwardVector() - GetActorUpVector());
-
-			NewVelocity.Normalize();
-
-			NewVelocity *= 5000.f;*/
-
-			//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorForwardVector() * 5000.f, FColor::Emerald, true, -1, 0, 10);
-
-			Bullet->SetVelocity(NewVelocity);
-
-			BulletWithdraw();
-
-			if (!HasAuthority())
+			if(HasAuthority())
 			{
-				Server_OnBulletFire(SpawnLocation, SpawnRotation, GetActorForwardVector() * 5000.f);
+				SpawnBullet(SpawnLocation, SpawnRotation, Direction);
+			}	
+			else
+			{
+				Server_OnBulletFire(SpawnLocation, SpawnRotation, Direction);
 			}
 		}
-
 	}
 	else
 	{
@@ -300,36 +246,25 @@ void ASkyFlyJetPawn::OnBulletFire()
 			{
 				Server_OnLaserFire();
 			}
-			//bOnLaserFire = !bOnLaserFire;
+			
 			CurrentLaserState = (CurrentLaserState == LaserState::FireOff ? LaserState::FireOn : LaserState::FireOff);
 			HandleLaser();
+			
+			//bOnLaserFire = !bOnLaserFire;			
 		}
 	}
 }
 
 void ASkyFlyJetPawn::ChangeMode()
 {
-	//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld()); //убрать інший юай з екрана
+	//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld()); //убрать інший юай з екрана 
 	if (!HasAuthority() && CurrentLaserState) //якщо лазер увімкнений на клієнті при переході в режим куль вирубити лазер
 	{
 		Server_OnLaserFire();
 	}
 	CurrentPowerMode = (CurrentPowerMode == PowerMode::Off ? PowerMode::On : PowerMode::Off); //перемкнути режим
 	if (CurrentLaserState)
-		CurrentLaserState = LaserState::FireOff; //і вирубити лазер
-	//UUserWidget* CurrentWidget = nullptr;     //створення і додання нового юая
-	//if(!CurrentPowerMode)
-	//	CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOff]);
-	//else 
-	//	CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[UIMode::UI_PowerOn]);
-	//CurrentWidget->AddToViewport();
-	//UWidgetBlueprintLibrary::SetInputMode_GameOnly(UGameplayStatics::GetPlayerController(this, 0));	
-	//PlayerHUD = Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD());
-
-	//Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD())->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);
-
-
-	
+		CurrentLaserState = LaserState::FireOff; //і вирубити лазер	
 	HandleLaser();	//якщо лазер увімкнений вирубити
 
 	if (!PlayerHUD)
@@ -378,28 +313,11 @@ void ASkyFlyJetPawn::DestroyLaser()
 }
 
 void ASkyFlyJetPawn::OnPause()
-{
-	/*if (!WidgetBP[UIMode::UI_PauseMenu])
-		return;
-
-	UUserWidget* PauseWidget = CreateWidget<UUserWidget>(GetWorld(), WidgetBP[2]);
-
-	if (!PauseWidget)
-		return;
-
-	PauseWidget->AddToViewport();
-	APlayerController* JetPlayer = UGameplayStatics::GetPlayerController(this, 0);
-	JetPlayer->SetShowMouseCursor(true);
-	UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(JetPlayer, PauseWidget);*/
-	/*if (!PlayerHUD)
-		return;*/
-	
-	//Cast<ASkyFlyHUD>(Cast<APlayerController>(GetController())->GetHUD())->SetUI(UIMode::UI_PauseMenu);
+{	
 	if (!PlayerHUD)
 		return;
 
-	PlayerHUD->SetUI(UIMode::UI_PauseMenu);
-	//GetController<APlayerController>()->GetHUD<ASkyFlyHUD>()->SetUI(UIMode::UI_PauseMenu);
+	PlayerHUD->SetUI(UIMode::UI_PauseMenu);	
 }
 
 void ASkyFlyJetPawn::RestorePower(float Value)
@@ -426,6 +344,29 @@ void ASkyFlyJetPawn::RestoreAmmo(uint8 Value)
 		Ammo = 10;
 }
 
+void ASkyFlyJetPawn::SpawnBullet(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
+{
+	ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
+
+	//UE_LOG(LogTemp, Warning, TEXT("BulletFired"));
+
+	/*DrawDebugLine(GetWorld(), SpawnLocation + GetActorRotation().RotateVector(GunOffset),
+		GetActorForwardVector().RotateAngleAxis(35.f, GetActorRightVector()) * 5000.f, FColor::Emerald, true, -1, 0, 10);*/
+
+	if (!Bullet)
+		return;
+
+	Bullet->SetOwner(this);
+	Bullet->BulletMesh->MoveIgnoreActors.Add(GetInstigator());
+	Bullet->BulletMesh->MoveIgnoreActors.Add(this);							
+
+	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorForwardVector() * 5000.f, FColor::Emerald, true, -1, 0, 10);
+
+	Bullet->SetVelocity(Direction);
+
+	BulletWithdraw();
+}
+
 bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
 {
 	return true;
@@ -433,14 +374,15 @@ bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotato
 
 void ASkyFlyJetPawn::Server_OnBulletFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
 {
-	ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
-
-	Bullet->SetOwner(this);
-	Bullet->BulletMesh->MoveIgnoreActors.Add(GetOwner());
-	Bullet->BulletMesh->MoveIgnoreActors.Add(GetInstigator());
+	/*ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
 	
-
-	Bullet->SetVelocity(Direction);
+	UE_LOG(LogTemp, Warning, TEXT("RPCBullet"));
+	
+	Bullet->SetOwner(this);
+	Bullet->BulletMesh->MoveIgnoreActors.Add(Bullet->GetOwner());
+	Bullet->BulletMesh->MoveIgnoreActors.Add(GetInstigator());
+	Bullet->SetVelocity(Direction);*/
+	SpawnBullet(SpawnLocation, SpawnRotation, Direction);
 }
 
 bool ASkyFlyJetPawn::Server_SetRotation_Validate(FVector Direction, float value)
@@ -531,6 +473,8 @@ float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 
 	if(PlayerHPWidget)
 	PlayerHPWidget->SetHealth(Health, MaxHealth);
+	else
+		UE_LOG(LogTemp, Warning, TEXT("Don't have widget"));
 	return DamageAmount;
 }
 
