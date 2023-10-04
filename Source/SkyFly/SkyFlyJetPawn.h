@@ -6,18 +6,14 @@
 #include "SkyShiftBullet.h"
 #include "SkyShiftLaser.h"
 #include "GameFramework/Pawn.h"
-#include "Net/UnrealNetwork.h"
 #include "EnemyHPWidget.h"
 #include "Components/SphereComponent.h"
 #include "Containers/EnumAsByte.h"
 #include "Blueprint/UserWidget.h"
 #include "SkyFlyHUD.h"
-#include "GameFramework/FloatingPawnMovement.h"
 #include "SkyFlyJetPawn.generated.h"
 
-//class ASkyShiftLaser;
-
-enum UIMode
+enum EUIMode
 {
 	/*UI_PowerOff = 0,
 	UI_PowerOn = 1,*/
@@ -26,17 +22,17 @@ enum UIMode
 
 
 UENUM()
-enum LaserState
+enum ELaserState
 {
-	FireOff = 0 UMETA(DisplayName = "FireOff"),
-	FireOn = 1 UMETA(DisplayName = "FireOn")
-};
+	FireOff = 0,
+	FireOn = 1 
+  };
 
 UENUM()
-enum PowerMode
+enum EPowerMode
 {
-	Off = 0 UMETA(DisplayName = "Off"),
-	On = 1 UMETA(DisplayName = "On")
+	Off = 0,
+	On = 1 
 };
 
 
@@ -49,28 +45,28 @@ public:
 	// Sets default values for this pawn's properties
 	ASkyFlyJetPawn();
 
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UStaticMeshComponent* JetMesh;
 
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	class USpringArmComponent* SpringArm;
 
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	class UCameraComponent* Camera;	
 
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	class USphereComponent* SpawnPoint;
 
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	class UWidgetComponent* HealthBarWidget;
 
-	UPROPERTY(Replicated, EditAnywhere, Category = "Movement")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Movement")
 	float Thrust = 0.f;
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float MaxThrust = 2500.f;	
 
-	UPROPERTY(Replicated, EditAnywhere, Category = "Health")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Health")
 	float Health = 100.f;
 
 	UPROPERTY(EditAnywhere, Category = "Health")
@@ -78,10 +74,10 @@ public:
 	
 
 	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Shooting")
-	TEnumAsByte<PowerMode> CurrentPowerMode = PowerMode::Off;
+	TEnumAsByte<EPowerMode> CurrentPowerMode = EPowerMode::Off;
 
 	UPROPERTY(ReplicatedUsing = HandleLaser, EditDefaultsOnly, Category = "Shooting")
-	TEnumAsByte <LaserState> CurrentLaserState = LaserState::FireOff;
+	TEnumAsByte <ELaserState> CurrentLaserState = ELaserState::FireOff;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Shooting")
 	float LaserPower = 5000.f;
@@ -98,7 +94,7 @@ public:
 	FTimerHandle LaserTimerHandle;	
 
 	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Movement")
-	FVector ForvardVelocity = FVector(0.f);	
+	FVector ForwardVelocity = FVector(0.f);	
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	TSubclassOf<ASkyShiftBullet> BulletClass;
@@ -106,31 +102,26 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	TSubclassOf<ASkyShiftLaser> LaserClass;	
 
-	UPROPERTY(EditAnywhere, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> EnemyHPWidgetClass;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class USkyFlyCanvas> PlayerCanvasClass;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UICanvas> PlayerCanvasClass;
 
-	UPROPERTY(EditAnywhere)
-	class USkyFlyCanvas* PlayerCanvas;
+	UPROPERTY(EditDefaultsOnly)
+	class UICanvas* PlayerCanvas;
 		
 	UPROPERTY(Replicated)
-	ASkyShiftLaser* Laser = nullptr;	
+	ASkyShiftLaser* Laser;	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Gameplay)
 	FVector GunOffset;
 
-	ASkyFlyHUD* PlayerHUD = nullptr;
-
-	UUserWidget* MyHP = nullptr;
+	UPROPERTY()
+	ASkyFlyHUD* PlayerHUD;	
 
 	UPROPERTY(Replicated)
-	UEnemyHPWidget* PlayerHPWidget = nullptr;
-
-	TArray<AActor*> FoundActors;
-
-	TArray<UUserWidget*> PlayerWidgets;
+	UEnemyHPWidget* PlayerHPWidget;	
 
 protected:
 	// Called when the game starts or when spawned
@@ -209,26 +200,26 @@ public:
 	UFUNCTION()
 	void BulletWithdraw();
 
-	UFUNCTION(BlueprintPure, Category = "Counter")
-	float GetPower();
+	UFUNCTION(BlueprintCallable, Category = "Counter")
+	float GetPower() const;
 
-	UFUNCTION(BlueprintPure, Category = "Counter")
-	float GetMaxPower();
+	UFUNCTION(BlueprintCallable, Category = "Counter")
+	float GetMaxPower() const;
 
-	UFUNCTION(BlueprintPure, Category = "Counter")
-	uint8 GetAmmo();
+	UFUNCTION(BlueprintCallable, Category = "Counter")
+	uint8 GetAmmo() const;
 
-	UFUNCTION(BlueprintPure, Category = "Counter")
-	TEnumAsByte<PowerMode> GetPowerMode();
+	UFUNCTION(BlueprintCallable, Category = "Counter")
+	TEnumAsByte<EPowerMode> GetPowerMode() const;
 
 	UFUNCTION()
 	void HandleLaser();
 
-	UFUNCTION(BlueprintPure, Category = "Counter")
-	float GetHealth();
+	UFUNCTION(BlueprintCallable, Category = "Counter")
+	float GetHealth() const;
 
-	UFUNCTION(BlueprintPure, Category = "Counter")
-	float GetMaxHealth();
+	UFUNCTION(BlueprintCallable, Category = "Counter")
+	float GetMaxHealth() const;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 

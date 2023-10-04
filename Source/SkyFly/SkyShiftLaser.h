@@ -33,7 +33,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Particles")
 	class UParticleSystem* LaserHitParticleClass;
-		
+
+	UPROPERTY()
 	UPrimitiveComponent* Base;
 
 	UPROPERTY(Replicated)
@@ -60,6 +61,7 @@ public:
 
 	FHitResult Hit;
 
+	UPROPERTY()
 	AActor* PlayerToHit;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

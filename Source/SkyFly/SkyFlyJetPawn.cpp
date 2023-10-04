@@ -6,7 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
-#include "SkyFlyCanvas.h"
+#include "UICanvas.h"
 #include "Components/CanvasPanelSlot.h"
 #include "EngineUtils.h"
 #include "SkyFlyHUD.h"
@@ -19,8 +19,7 @@
 ASkyFlyJetPawn::ASkyFlyJetPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	SetReplicateMovement(true);
+	PrimaryActorTick.bCanEverTick = true;	
 	bReplicates = true;
 	
 	JetMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Jet Mesh"));
@@ -33,13 +32,10 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 200.0f;
-	//SpringArm->TargetArmLength = 500.f;
-	//SpringArm->SetRelativeLocation(FVector(0.f, 0.f, 100.f));
 	SpringArm->SocketOffset = FVector(0.f, 0.f, 100.f);
 	
 
 	Camera->SetupAttachment(SpringArm);
-	//Camera->SetRelativeLocation(FVector(0.f, 0.f, -100.f));
 
 	SpawnPoint->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	SpawnPoint->SetRelativeLocation({ 0.f, 0.f, 0.f });
@@ -73,42 +69,9 @@ void ASkyFlyJetPawn::BeginPlay()
 // Called every frame
 void ASkyFlyJetPawn::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	Super::Tick(DeltaTime);	
 
-	//if (HasAuthority() && !IsLocallyControlled())
-	//{
-	//	/*UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *ForvardVelocity.ToString());
-	//	UE_LOG(LogTemp, Warning, TEXT("Vector: %f"), Thrust);*/
-	//}
-	
-	/*if (IsLocallyControlled())
-	{
-
-		FVector2D outVector;		
-		for (TActorIterator<ASkyFlyJetPawn> It(GetWorld()); It; ++It)
-		{
-			if (!It->IsLocallyControlled())
-			{
-				UGameplayStatics::ProjectWorldToScreen(GetController<APlayerController>(), It->GetActorLocation(), outVector, false);
-				outVector *= FMath::Pow(UWidgetLayoutLibrary::GetViewportScale(GetWorld()), -1);
-				if (!It->PlayerHPWidget)
-					continue;
-
-				//UE_LOG(LogTemp, Warning, TEXT("OutVector: %s"), *outVector.ToString());
-
-				if (outVector.IsZero())
-					It->PlayerHPWidget->Visibility = ESlateVisibility::Hidden;
-				else
-				{
-					It->PlayerHPWidget->Visibility = ESlateVisibility::Visible;
-					Cast<UCanvasPanelSlot>(It->PlayerHPWidget->Slot)->SetPosition(outVector);
-				}			
-			}
-		}
-	}*/
-	
-
-	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);		
+	JetMesh->SetPhysicsLinearVelocity(ForwardVelocity);		
 }
 
 // Called to bind functionality to input
@@ -131,7 +94,7 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
-	DOREPLIFETIME(ASkyFlyJetPawn, ForvardVelocity);
+	DOREPLIFETIME(ASkyFlyJetPawn, ForwardVelocity);
 	DOREPLIFETIME(ASkyFlyJetPawn, Ammo);
 	DOREPLIFETIME(ASkyFlyJetPawn, Power);
 	DOREPLIFETIME(ASkyFlyJetPawn, Health);
@@ -145,7 +108,7 @@ void ASkyFlyJetPawn::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrim
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
 	// Deflect along the surface when we collide.
-	FRotator CurrentRotation = GetActorRotation();
+	const FRotator CurrentRotation = GetActorRotation();
 	SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.012f));
 }
 
@@ -154,13 +117,11 @@ void ASkyFlyJetPawn::JetThrust(float value)
 	if (!FMath::IsNearlyZero(value))
 	{
 		float Res = FMath::Lerp(-MaxThrust, MaxThrust, (value + 1.f) / 2.f);
-		/*UE_LOG(LogTemp, Warning, TEXT("Lerp: %f"), Res);*/
 		Thrust = FMath::FInterpTo(Thrust, Res, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 0.25);
-		/*UE_LOG(LogTemp, Warning, TEXT("Thrust: %f"), Thrust);*/
 	}
-	ForvardVelocity = GetActorForwardVector() * Thrust;
+	ForwardVelocity = GetActorForwardVector() * Thrust;
 
-	Server_SetLinearVelocity(ForvardVelocity);
+	Server_SetLinearVelocity(ForwardVelocity);
 }
 
 void ASkyFlyJetPawn::MoveUp(float value)
@@ -211,7 +172,7 @@ void ASkyFlyJetPawn::OnBulletFire()
 
 			const FVector SpawnLocation = SpawnPoint->GetComponentLocation() + GetActorRotation().RotateVector(GunOffset);
 
-			FVector Direction = GetActorForwardVector().RotateAngleAxis(35.f, GetActorRightVector()) * 5000.f;
+			const FVector Direction = GetActorForwardVector().RotateAngleAxis(35.f, GetActorRightVector()) * 5000.f;
 
 			if(HasAuthority())
 			{
@@ -232,30 +193,27 @@ void ASkyFlyJetPawn::OnBulletFire()
 				Server_OnLaserFire();
 			}
 			
-			CurrentLaserState = (CurrentLaserState == LaserState::FireOff ? LaserState::FireOn : LaserState::FireOff);
-			HandleLaser();
-			
-			//bOnLaserFire = !bOnLaserFire;			
+			CurrentLaserState = (CurrentLaserState == ELaserState::FireOff ? ELaserState::FireOn : ELaserState::FireOff);
+			HandleLaser();		
 		}
 	}
 }
 
 void ASkyFlyJetPawn::ChangeMode()
 {
-	//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld()); //убрать інший юай з екрана 
 	if (!HasAuthority() && CurrentLaserState) //якщо лазер увімкнений на клієнті при переході в режим куль вирубити лазер
 	{
 		Server_OnLaserFire();
 	}
-	CurrentPowerMode = (CurrentPowerMode == PowerMode::Off ? PowerMode::On : PowerMode::Off); //перемкнути режим
+	CurrentPowerMode = (CurrentPowerMode == EPowerMode::Off ? EPowerMode::On : EPowerMode::Off); //перемкнути режим
 	if (CurrentLaserState)
-		CurrentLaserState = LaserState::FireOff; //і вирубити лазер	
+		CurrentLaserState = ELaserState::FireOff; //і вирубити лазер	
 	HandleLaser();	//якщо лазер увімкнений вирубити
 
 	if (!PlayerHUD)
 		return;
 
-	PlayerHUD->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);
+	PlayerHUD->SwitcherWidget->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);
 
 }
 
@@ -302,38 +260,27 @@ void ASkyFlyJetPawn::OnPause()
 	if (!PlayerHUD)
 		return;
 
-	PlayerHUD->SetUI(UIMode::UI_PauseMenu);	
+	PlayerHUD->SetUI(EUIMode::UI_PauseMenu);	
 }
 
-void ASkyFlyJetPawn::RestorePower(float Value)
+void ASkyFlyJetPawn::RestorePower(const float Value)
 {
-	if (MaxPower - Value > Power)
-		Power += Value;
-	else
-		Power = MaxPower;
+	(MaxPower - Value > Power) ? Power += Value : Power = MaxPower;
 }
 
-void ASkyFlyJetPawn::RestoreHealth(float Value)
+void ASkyFlyJetPawn::RestoreHealth(const float Value)
 {
-	if (MaxHealth - Value > Health)
-		Health += Value;
-	else
-		Health = MaxHealth;
+	(MaxHealth - Value > Health) ? Health += Value : Health = MaxHealth;
 }
 
-void ASkyFlyJetPawn::RestoreAmmo(uint8 Value)
+void ASkyFlyJetPawn::RestoreAmmo(const uint8 Value)
 {
-	if (10 - Value > Ammo)
-		Ammo += Value;
-	else
-		Ammo = 10;
+	(10 - Value > Ammo) ? Ammo += Value : Ammo = 10;
 }
 
 void ASkyFlyJetPawn::SpawnBullet(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
 {
 	ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
-
-	//UE_LOG(LogTemp, Warning, TEXT("BulletFired"));
 
 	/*DrawDebugLine(GetWorld(), SpawnLocation + GetActorRotation().RotateVector(GunOffset),
 		GetActorForwardVector().RotateAngleAxis(35.f, GetActorRightVector()) * 5000.f, FColor::Emerald, true, -1, 0, 10);*/
@@ -358,15 +305,7 @@ bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotato
 }
 
 void ASkyFlyJetPawn::Server_OnBulletFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
-{
-	/*ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
-	
-	UE_LOG(LogTemp, Warning, TEXT("RPCBullet"));
-	
-	Bullet->SetOwner(this);
-	Bullet->BulletMesh->MoveIgnoreActors.Add(Bullet->GetOwner());
-	Bullet->BulletMesh->MoveIgnoreActors.Add(GetInstigator());
-	Bullet->SetVelocity(Direction);*/
+{	
 	SpawnBullet(SpawnLocation, SpawnRotation, Direction);
 }
 
@@ -387,7 +326,7 @@ bool ASkyFlyJetPawn::Server_SetLinearVelocity_Validate(FVector NewVelocity)
 
 void ASkyFlyJetPawn::Server_SetLinearVelocity_Implementation(FVector NewVelocity)
 {
-	ForvardVelocity = NewVelocity;
+	ForwardVelocity = NewVelocity;
 }
 
 bool ASkyFlyJetPawn::Server_OnLaserFire_Validate()
@@ -397,7 +336,7 @@ bool ASkyFlyJetPawn::Server_OnLaserFire_Validate()
 
 void ASkyFlyJetPawn::Server_OnLaserFire_Implementation()
 {	
-	CurrentLaserState = (CurrentLaserState == LaserState::FireOff ? LaserState::FireOn : LaserState::FireOff);
+	CurrentLaserState = (CurrentLaserState == ELaserState::FireOff ? ELaserState::FireOn : ELaserState::FireOff);
 	HandleLaser();
 }
 
@@ -412,22 +351,22 @@ void ASkyFlyJetPawn::BulletWithdraw()
 	Ammo -= 1;
 }
 
-float ASkyFlyJetPawn::GetPower()
+float ASkyFlyJetPawn::GetPower() const 
 {
 	return Power;
 }
 
-float ASkyFlyJetPawn::GetMaxPower()
+float ASkyFlyJetPawn::GetMaxPower() const
 {
 	return MaxPower;
 }
 
-uint8 ASkyFlyJetPawn::GetAmmo()
+uint8 ASkyFlyJetPawn::GetAmmo() const
 {
 	return Ammo;
 }
 
-TEnumAsByte<PowerMode> ASkyFlyJetPawn::GetPowerMode()
+TEnumAsByte<EPowerMode> ASkyFlyJetPawn::GetPowerMode() const
 {
 	return CurrentPowerMode;
 }
@@ -439,12 +378,12 @@ void ASkyFlyJetPawn::HandleLaser()
 	else DestroyLaser();
 }
 
-float ASkyFlyJetPawn::GetHealth()
+float ASkyFlyJetPawn::GetHealth() const
 {
 	return Health;
 }
 
-float ASkyFlyJetPawn::GetMaxHealth()
+float ASkyFlyJetPawn::GetMaxHealth() const
 {
 	return MaxHealth;
 }
@@ -452,14 +391,10 @@ float ASkyFlyJetPawn::GetMaxHealth()
 float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Health: %u"), Health);
-	if (Health > DamageAmount)
-		Health = Health - DamageAmount;
-	else 
-		Health = 0.f;
+	(Health > DamageAmount) ? Health = Health - DamageAmount : Health = 0.f;
 
 	if(PlayerHPWidget)
 	PlayerHPWidget->SetHealth(Health, MaxHealth);
-	//if(!IsLocallyControlled())
 	
 	return DamageAmount;
 }
@@ -467,13 +402,13 @@ float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 void ASkyFlyJetPawn::OnKillZoneEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	/*FDamageEvent DamageEvent;
+	FDamageEvent DamageEvent;
 	if (ASkyShiftLaser* LaserCollided = Cast<ASkyShiftLaser>(OtherActor))
 	{
 		if(LaserCollided->GetOwner() != this)
 			this->TakeDamage(LaserCollided->DamagePerTick, DamageEvent, LaserCollided->GetInstigatorController(), LaserCollided);
 		//UE_LOG(LogTemp, Warning, TEXT("BulletTime"));
-	}*/
+	}
 	//UE_LOG(LogTemp, Warning, TEXT("Why Don't You Work("));
 }
 
@@ -481,13 +416,11 @@ void ASkyFlyJetPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor
 {	
 	if (ASkyShiftBullet* Bullet = Cast<ASkyShiftBullet>(OtherActor))
 	{
-		FDamageEvent DamageEvent;
+		const FDamageEvent DamageEvent;
 		this->TakeDamage(Bullet->Damage, DamageEvent, Bullet->GetInstigatorController(), Bullet);
 		Bullet->Destroy();
 		//UE_LOG(LogTemp, Warning, TEXT("BulletTime"));
-	}		
-	//else
-		//UE_LOG(LogTemp, Warning, TEXT("LaserTime"));
+	}
 }
 
 

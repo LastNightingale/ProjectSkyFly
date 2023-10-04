@@ -36,7 +36,7 @@ void ASkyShiftBullet::Tick(float DeltaTime)
 
 }
 
-void ASkyShiftBullet::SetVelocity(FVector NewVelocity)
+void ASkyShiftBullet::SetVelocity(FVector NewVelocity) const
 {
 	BulletMovement->Velocity = NewVelocity;
 }

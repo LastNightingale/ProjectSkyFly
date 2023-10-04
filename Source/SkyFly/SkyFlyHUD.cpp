@@ -5,32 +5,22 @@
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"
-#include "Kismet/GameplayStatics.h"
 
 void ASkyFlyHUD::BeginPlay()
 {
-	UUserWidget* Widget = CreateWidget<UUserWidget>(GetWorld(), UISwitcherClass);
-	Widget->AddToViewport();
-	UISwitcher = Cast<UWidgetSwitcher>(Widget->WidgetTree->FindWidget(FName("Switcher")));
-	UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayerController());
-	UISwitcher->SetActiveWidgetIndex(0);
-
-	/*CanvasPanelWidget = CreateWidget<UUserWidget>(GetOwningPlayerController());
-
-	CanvasPanel = CanvasPanelWidget->WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass());*/
-
-	//CanvasPanelWidget->AddToViewport();
+	SwitcherWidget = CreateWidget<UPowerModeSwitcher>(GetWorld(), UISwitcherClass);
+	SwitcherWidget->AddToViewport();
 	
-	//Canvas = Cast<UCanvasPanel>(CanvasPanel);
-
+	UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayerController());
+	SwitcherWidget->UISwitcher->SetActiveWidgetIndex(0);
 }
 
-void ASkyFlyHUD::SetUI(uint8 index)
+void ASkyFlyHUD::SetUI(uint8 Index)
 {
-	if (!UIWidgets[index])
+	if (!UIWidgets[Index])
 		return;
 
-	UUserWidget* NewWidget = CreateWidget<UUserWidget>(GetWorld(), UIWidgets[index]);
+	UUserWidget* NewWidget = CreateWidget<UUserWidget>(GetWorld(), UIWidgets[Index]);
 
 	if (!NewWidget)
 		return;

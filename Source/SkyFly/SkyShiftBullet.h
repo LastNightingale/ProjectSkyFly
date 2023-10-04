@@ -34,13 +34,10 @@ public:
 	UProjectileMovementComponent* BulletMovement;
 
 	UFUNCTION()
-	void SetVelocity(FVector NewVelocity);
+	void SetVelocity(FVector NewVelocity) const;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	float Damage = 10.f;
-
-	
-	
+	float Damage = 10.f;	
 
 
 };

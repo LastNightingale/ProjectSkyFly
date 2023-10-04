@@ -4,18 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "SkyFlyCanvas.generated.h"
+#include "Components/WidgetSwitcher.h"
+#include "PowerModeSwitcher.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SKYFLY_API USkyFlyCanvas : public UUserWidget
+class SKYFLY_API UPowerModeSwitcher : public UUserWidget
 {
 	GENERATED_BODY()
-public:	
-
+	
+public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	class UCanvasPanel* Canvas;
+	UWidgetSwitcher* UISwitcher;
 	
 };

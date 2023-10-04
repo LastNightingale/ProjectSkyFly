@@ -4,8 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
-#include "Components/CanvasPanel.h"
-#include "Components/WidgetSwitcher.h"
+#include "PowerModeSwitcher.h"
 #include "SkyFlyHUD.generated.h"
 
 /**
@@ -25,7 +24,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> UISwitcherClass = nullptr;
 
-	UWidgetSwitcher* UISwitcher = nullptr;
+	UPROPERTY()
+	UPowerModeSwitcher* SwitcherWidget;
 
 	uint8 CurrentUI = 0;
 
@@ -36,5 +36,5 @@ public:
 
 	UCanvasPanel* CanvasPanel;*/
 
-	void SetUI(uint8 index);
+	void SetUI(uint8 Index);
 };
