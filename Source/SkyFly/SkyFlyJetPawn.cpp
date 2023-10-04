@@ -4,6 +4,7 @@
 #include "SkyFlyJetPawn.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "SkyFlyCanvas.h"
 #include "Components/CanvasPanelSlot.h"
@@ -26,6 +27,7 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Arm"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	SpawnPoint = CreateDefaultSubobject<USphereComponent>(TEXT("Spawn Point"));
+	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Health Widget"));
 
 	SetRootComponent(JetMesh);
 
@@ -42,40 +44,23 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 	SpawnPoint->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	SpawnPoint->SetRelativeLocation({ 0.f, 0.f, 0.f });
 
+	HealthBarWidget->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	HealthBarWidget->SetRelativeLocation({ 0.f, 0.f, 50.f });
+
 	Thrust = MaxThrust / 2.f;	
 
 	GunOffset = FVector(25.0f, 0.0f, -25.0f);
-	//JetMesh->OnComponent.AddDynamic(this, &ASkyFlyJetPawn::OnHit);
-
+	//JetMesh->OnComponent.AddDynamic(this, &ASkyFlyJetPawn::OnHit);	
 	
-	PlayerWidgets.Init(nullptr, 2);
 }
 
 // Called when the game starts or when spawned
 void ASkyFlyJetPawn::BeginPlay()
 {
-	Super::BeginPlay();
+	Super::BeginPlay();	
+
+	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->PlayerRef = this;
 	
-	if (IsLocallyControlled() && PlayerCanvasClass)
-	{
-		APlayerController* PC = GetController<APlayerController>();
-		check(PC);
-		//PlayerHPWidget = (CreateWidget<UEnemyHPWidget>(PC, EnemyHPWidgetClass));
-		PlayerCanvas = CreateWidget<USkyFlyCanvas>(PC, PlayerCanvasClass);
-		check(PlayerCanvas);
-		PlayerCanvas->AddToPlayerScreen();
-		
-		for (TActorIterator<ASkyFlyJetPawn> It(GetWorld()); It; ++It)
-		{
-			if (!It->IsLocallyControlled())
-			{
-				It->PlayerHPWidget = CreateWidget<UEnemyHPWidget>(PC, EnemyHPWidgetClass);
-				PlayerWidgets.Add(It->PlayerHPWidget);
-				//check(It->PlayerHPWidget);
-				PlayerCanvas->Canvas->AddChildToCanvas(PlayerWidgets.Top());
-			}			
-		}
-	}
 
 	if(GetController<APlayerController>())
 	PlayerHUD = GetController<APlayerController>()->GetHUD<ASkyFlyHUD>();		
@@ -96,7 +81,7 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 	//	UE_LOG(LogTemp, Warning, TEXT("Vector: %f"), Thrust);*/
 	//}
 	
-	if (IsLocallyControlled())
+	/*if (IsLocallyControlled())
 	{
 
 		FVector2D outVector;		
@@ -120,7 +105,7 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 				}			
 			}
 		}
-	}
+	}*/
 	
 
 	JetMesh->SetPhysicsLinearVelocity(ForvardVelocity);		
@@ -466,6 +451,7 @@ float ASkyFlyJetPawn::GetMaxHealth()
 
 float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	//UE_LOG(LogTemp, Warning, TEXT("Health: %u"), Health);
 	if (Health > DamageAmount)
 		Health = Health - DamageAmount;
 	else 
@@ -473,29 +459,29 @@ float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 
 	if(PlayerHPWidget)
 	PlayerHPWidget->SetHealth(Health, MaxHealth);
-	else
-		UE_LOG(LogTemp, Warning, TEXT("Don't have widget"));
+	//if(!IsLocallyControlled())
+	
 	return DamageAmount;
 }
 
 void ASkyFlyJetPawn::OnKillZoneEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	FDamageEvent DamageEvent;
+	/*FDamageEvent DamageEvent;
 	if (ASkyShiftLaser* LaserCollided = Cast<ASkyShiftLaser>(OtherActor))
 	{
 		if(LaserCollided->GetOwner() != this)
 			this->TakeDamage(LaserCollided->DamagePerTick, DamageEvent, LaserCollided->GetInstigatorController(), LaserCollided);
 		//UE_LOG(LogTemp, Warning, TEXT("BulletTime"));
-	}
+	}*/
 	//UE_LOG(LogTemp, Warning, TEXT("Why Don't You Work("));
 }
 
 void ASkyFlyJetPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	FDamageEvent DamageEvent;
+{	
 	if (ASkyShiftBullet* Bullet = Cast<ASkyShiftBullet>(OtherActor))
 	{
+		FDamageEvent DamageEvent;
 		this->TakeDamage(Bullet->Damage, DamageEvent, Bullet->GetInstigatorController(), Bullet);
 		Bullet->Destroy();
 		//UE_LOG(LogTemp, Warning, TEXT("BulletTime"));

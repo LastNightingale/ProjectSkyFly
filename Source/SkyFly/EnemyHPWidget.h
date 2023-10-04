@@ -17,6 +17,9 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 		class UProgressBar* HealthBar;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Variables")
+	class ASkyFlyJetPawn* PlayerRef = nullptr;
 	
 	void SetHealth(float CurrentHealth, float MaxHealth);
 };

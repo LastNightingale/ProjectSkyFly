@@ -19,7 +19,7 @@ ASkyShiftBullet::ASkyShiftBullet()
 
 	SetRootComponent(BulletMesh);
 
-	UE_LOG(LogTemp, Warning, TEXT("BulletSpawned"));
+	//UE_LOG(LogTemp, Warning, TEXT("BulletSpawned"));
 }
 
 // Called when the game starts or when spawned
