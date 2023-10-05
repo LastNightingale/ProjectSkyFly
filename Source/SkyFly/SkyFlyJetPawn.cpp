@@ -7,6 +7,7 @@
 #include "Components/WidgetComponent.h"
 #include "SkyFlyHUD.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -63,7 +64,15 @@ void ASkyFlyJetPawn::BeginPlay()
 // Called every frame
 void ASkyFlyJetPawn::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);	
+	Super::Tick(DeltaTime);
+
+	if(!IsLocallyControlled())
+	{
+		const FVector Location = HealthBarWidget->GetComponentLocation();
+		const FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(Location,
+			UGameplayStatics::GetPlayerPawn(GetWorld(),0)->GetActorLocation());
+		HealthBarWidget->SetWorldRotation(PlayerRot);
+	}
 
 	JetMesh->SetPhysicsLinearVelocity(ForwardVelocity);		
 }
