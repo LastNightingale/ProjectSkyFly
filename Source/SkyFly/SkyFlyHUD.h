@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerList.h"
 #include "GameFramework/HUD.h"
 #include "PowerModeSwitcher.h"
 #include "SkyFlyHUD.generated.h"
@@ -24,17 +25,23 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> UISwitcherClass = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UPlayerList> PlayerListClass;
+
 	UPROPERTY()
 	UPowerModeSwitcher* SwitcherWidget;
+
+	UPROPERTY()
+	UPlayerList* PlayerList;
 
 	uint8 CurrentUI = 0;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> UIWidgets[1];
 
-	/*UUserWidget* CanvasPanelWidget;
-
-	UCanvasPanel* CanvasPanel;*/
+	void OpenPlayerList();
+	
+	void ClosePlayerList();
 
 	void SetUI(uint8 Index);
 };

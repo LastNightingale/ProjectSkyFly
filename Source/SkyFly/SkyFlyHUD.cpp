@@ -9,10 +9,30 @@
 void ASkyFlyHUD::BeginPlay()
 {
 	SwitcherWidget = CreateWidget<UPowerModeSwitcher>(GetWorld(), UISwitcherClass);
-	SwitcherWidget->AddToViewport();
+	PlayerList = CreateWidget<UPlayerList>(GetWorld(), PlayerListClass);	
+	SwitcherWidget->AddToViewport();	
+	
 	
 	UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayerController());
-	SwitcherWidget->UISwitcher->SetActiveWidgetIndex(0);
+	SwitcherWidget->UISwitcher->SetActiveWidgetIndex(0);	
+}
+
+void ASkyFlyHUD::OpenPlayerList()
+{
+	if(!PlayerList->IsInViewport())
+	{
+		PlayerList->AddToViewport();
+		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetOwningPlayerController(), PlayerList);
+	}		
+}
+
+void ASkyFlyHUD::ClosePlayerList()
+{
+	if(PlayerList->IsInViewport())
+	{
+		PlayerList->RemoveFromParent();
+		UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayerController());
+	}	
 }
 
 void ASkyFlyHUD::SetUI(uint8 Index)

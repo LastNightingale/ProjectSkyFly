@@ -166,6 +166,12 @@ public:
 	UFUNCTION()
 	void OnPause();
 
+	UFUNCTION()
+	void OpenPlayerPanel();
+
+	UFUNCTION()
+	void ClosePlayerPanel();
+
 	void RestorePower(float Value);
 
 	void RestoreHealth(float Value);

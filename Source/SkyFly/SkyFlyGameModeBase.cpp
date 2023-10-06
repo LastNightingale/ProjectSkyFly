@@ -3,8 +3,9 @@
 
 #include "SkyFlyGameModeBase.h"
 
-#include "SkyFlyGameState.h"
+#include "SkyFlyGameStateBase.h"
 #include "SkyFlyJetPawn.h"
+#include "SkyFlyPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -71,7 +72,10 @@ void ASkyFlyGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	AllPlayerControllers.Add(NewPlayer);
+	AllPlayerControllers.Add(Cast<ASkyFlyPlayerController>(NewPlayer));
+
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("%d = Num"), NewPlayer->GetUniqueID()));*/
 
 	UpdatePlayerList();
 }
@@ -80,12 +84,21 @@ void ASkyFlyGameModeBase::Logout(AController* Exiting)
 {
 	Super::Logout(Exiting);
 
-	AllPlayerControllers.Remove(Cast<APlayerController>(Exiting));
+	AllPlayerControllers.Remove(Cast<ASkyFlyPlayerController>(Exiting));
 
 	UpdatePlayerList();
 }
 
-void ASkyFlyGameModeBase::UpdatePlayerList()
+void ASkyFlyGameModeBase::KickPlayer(uint8 PlayerID)
 {
-	GetGameState<ASkyFlyGameState>()->UpdatePlayerList();
+	AllPlayerControllers[PlayerID]->Client_KickPlayer();
+}
+
+void ASkyFlyGameModeBase::UpdatePlayerList()
+{	
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+	{
+		GetGameState<ASkyFlyGameStateBase>()->UpdatePlayerList();
+	}, 0.1, false);
+	
 }

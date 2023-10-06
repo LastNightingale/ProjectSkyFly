@@ -54,7 +54,7 @@ void ASkyFlyJetPawn::BeginPlay()
 	
 
 	if(GetController<APlayerController>())
-	PlayerHUD = GetController<APlayerController>()->GetHUD<ASkyFlyHUD>();		
+	PlayerHUD = GetController<APlayerController>()->GetHUD<ASkyFlyHUD>();	
 	
 
 	JetMesh->OnComponentBeginOverlap.AddDynamic(this, &ASkyFlyJetPawn::OnKillZoneEnter);
@@ -90,6 +90,8 @@ void ASkyFlyJetPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("OnBulletFire", IE_Pressed, this, &ASkyFlyJetPawn::OnBulletFire);
 	PlayerInputComponent->BindAction("ChangeMode", IE_Pressed, this, &ASkyFlyJetPawn::ChangeMode);
 	PlayerInputComponent->BindAction("Pause", IE_Pressed, this, &ASkyFlyJetPawn::OnPause);
+	PlayerInputComponent->BindAction("OpenPlayerPanel", IE_Pressed, this, &ASkyFlyJetPawn::OpenPlayerPanel);
+	//PlayerInputComponent->BindAction("ClosePlayerPanel", IE_Released, this, &ASkyFlyJetPawn::ClosePlayerPanel);
 }
 
 void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -264,6 +266,16 @@ void ASkyFlyJetPawn::OnPause()
 		return;
 
 	PlayerHUD->SetUI(EUIMode::UI_PauseMenu);	
+}
+
+void ASkyFlyJetPawn::OpenPlayerPanel()
+{
+	PlayerHUD->OpenPlayerList();
+}
+
+void ASkyFlyJetPawn::ClosePlayerPanel()
+{
+	PlayerHUD->ClosePlayerList();
 }
 
 void ASkyFlyJetPawn::RestorePower(const float Value)

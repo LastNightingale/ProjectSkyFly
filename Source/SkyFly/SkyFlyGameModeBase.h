@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SkyFlyPlayerController.h"
 #include "GameFramework/GameModeBase.h"
 #include "SkyFlyGameModeBase.generated.h"
 
@@ -24,11 +25,15 @@ public:
 
 	virtual void Logout(AController* Exiting) override;
 
+	void KickPlayer(uint8 PlayerID);
+
 	void UpdatePlayerList();
 
 private:
 
 	UPROPERTY()
-	TArray<APlayerController*> AllPlayerControllers; 
+	TArray<ASkyFlyPlayerController*> AllPlayerControllers;
+
+	FTimerHandle TimerHandle;
 	
 };

@@ -3,20 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameState.h"
-#include "SkyFlyGameState.generated.h"
+#include "PlayerList.h"
+#include "GameFramework/GameStateBase.h"
+#include "SkyFlyGameStateBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SKYFLY_API ASkyFlyGameState : public AGameState
+class SKYFLY_API ASkyFlyGameStateBase : public AGameStateBase
 {
 	GENERATED_BODY()
 public:
 
 	UPROPERTY(ReplicatedUsing = OnRep_AllPlayerStates)
 	TArray<APlayerState*> AllPlayerStates;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UPlayerList> PlayerListClass;
 	
 	void UpdatePlayerList();
 
