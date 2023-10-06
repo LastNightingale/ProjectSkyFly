@@ -2,6 +2,8 @@
 
 
 #include "SkyFlyGameModeBase.h"
+
+#include "SkyFlyGameState.h"
 #include "SkyFlyJetPawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
@@ -15,6 +17,7 @@ void ASkyFlyGameModeBase::BeginPlay()
 void ASkyFlyGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
 	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
+	
 
 	////
 
@@ -62,4 +65,27 @@ void ASkyFlyGameModeBase::HandleStartingNewPlayer_Implementation(APlayerControll
 	////ASkyFlyJetPawn* TempActor = Cast<ASkyFlyJetPawn>(GetWorld()->SpawnActor(ASkyFlyJetPawn::StaticClass(), &TempLoc, &TempRot, SpawnInfo));
 	//NewPlayer->Possess(Cast<APawn>(TempActor));
 	
+}
+
+void ASkyFlyGameModeBase::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	AllPlayerControllers.Add(NewPlayer);
+
+	UpdatePlayerList();
+}
+
+void ASkyFlyGameModeBase::Logout(AController* Exiting)
+{
+	Super::Logout(Exiting);
+
+	AllPlayerControllers.Remove(Cast<APlayerController>(Exiting));
+
+	UpdatePlayerList();
+}
+
+void ASkyFlyGameModeBase::UpdatePlayerList()
+{
+	GetGameState<ASkyFlyGameState>()->UpdatePlayerList();
 }

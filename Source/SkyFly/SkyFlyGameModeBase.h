@@ -19,5 +19,16 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
+	virtual void PostLogin (APlayerController * NewPlayer) override;
+
+	virtual void Logout(AController* Exiting) override;
+
+	void UpdatePlayerList();
+
+private:
+
+	UPROPERTY()
+	TArray<APlayerController*> AllPlayerControllers; 
 	
 };
