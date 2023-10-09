@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PlayerList.h"
+#include "UIWidgets/PlayerList.h"
 #include "GameFramework/HUD.h"
-#include "PowerModeSwitcher.h"
+#include "UIWidgets/PowerModeSwitcher.h"
 #include "SkyFlyHUD.generated.h"
 
 /**

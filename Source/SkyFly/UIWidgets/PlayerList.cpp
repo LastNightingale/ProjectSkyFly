@@ -3,7 +3,7 @@
 
 #include "PlayerList.h"
 
-#include "SkyFlyGameStateBase.h"
+#include "Instruments/SkyFlyGameStateBase.h"
 #include "Components/ScrollBox.h"
 #include "GameFramework/PlayerState.h"
 

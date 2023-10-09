@@ -4,8 +4,8 @@
 #include "SkyFlyGameModeBase.h"
 
 #include "SkyFlyGameStateBase.h"
-#include "SkyFlyJetPawn.h"
-#include "SkyFlyPlayerController.h"
+#include "Player/SkyFlyJetPawn.h"
+#include "Player/SkyFlyPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/KismetMathLibrary.h"

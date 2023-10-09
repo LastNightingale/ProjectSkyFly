@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SkyShiftBullet.h"
-#include "SkyShiftLaser.h"
+#include "Weapons/SkyShiftBullet.h"
+#include "Weapons/SkyShiftLaser.h"
 #include "GameFramework/Pawn.h"
-#include "EnemyHPWidget.h"
+#include "UIWidgets/EnemyHPWidget.h"
 #include "Components/SphereComponent.h"
 #include "Containers/EnumAsByte.h"
 #include "Blueprint/UserWidget.h"
-#include "SkyFlyHUD.h"
+#include "Instruments/SkyFlyHUD.h"
 #include "SkyFlyJetPawn.generated.h"
 
 enum EUIMode
@@ -105,11 +105,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> EnemyHPWidgetClass;
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UICanvas> PlayerCanvasClass;
+	/*UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UICanvas> PlayerCanvasClass;*/
 
-	UPROPERTY(EditDefaultsOnly)
-	class UICanvas* PlayerCanvas;
+	/*UPROPERTY(EditDefaultsOnly)
+	class UICanvas* PlayerCanvas;*/
 		
 	UPROPERTY(Replicated)
 	ASkyShiftLaser* Laser;	

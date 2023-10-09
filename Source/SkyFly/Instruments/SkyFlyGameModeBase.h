@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SkyFlyPlayerController.h"
+#include "Player/SkyFlyPlayerController.h"
 #include "GameFramework/GameModeBase.h"
 #include "SkyFlyGameModeBase.generated.h"
 

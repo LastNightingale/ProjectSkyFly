@@ -3,7 +3,7 @@
 
 #include "PlayerListItem.h"
 
-#include "SkyFlyGameModeBase.h"
+#include "Instruments/SkyFlyGameModeBase.h"
 #include "Components/Button.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/TextBlock.h"

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PlayerList.h"
+#include "UIWidgets/PlayerList.h"
 #include "GameFramework/GameStateBase.h"
 #include "SkyFlyGameStateBase.generated.h"
 

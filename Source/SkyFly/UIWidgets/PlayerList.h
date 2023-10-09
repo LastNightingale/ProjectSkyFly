@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PlayerListItem.h"
+#include "UIWidgets/PlayerListItem.h"
 #include "Blueprint/UserWidget.h"
 #include "PlayerList.generated.h"
 

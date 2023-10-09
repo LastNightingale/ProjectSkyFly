@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "SkyFlyJetPawn.h"
+#include "Player/SkyFlyJetPawn.h"
 #include "Components/SphereComponent.h"
 #include "Collectable.generated.h"
 
