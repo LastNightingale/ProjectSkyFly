@@ -6,7 +6,6 @@
 #include "SkyFlyGameStateBase.h"
 #include "Components/ScrollBox.h"
 #include "GameFramework/PlayerState.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 void UPlayerList::UpdateWidget()
 {
@@ -17,9 +16,11 @@ void UPlayerList::UpdateWidget()
 
 	for(uint8 Iter = 0; Iter < Players.Num(); ++Iter)
 	{
-		auto CurrentWidget = Cast<UPlayerListItem>(CreateWidget(GetOwningPlayer(),ItemClass));
-		CurrentWidget->Text = FText::FromString(Players[Iter]->GetName());
+		const auto CurrentWidget = Cast<UPlayerListItem>(CreateWidget(GetOwningPlayer(),ItemClass));
+		CurrentWidget->Text = FText::FromString(Players[Iter]->GetPlayerName());
 		CurrentWidget->PlayerID = Iter;
 		PlayerListScrollBox->AddChild(CurrentWidget);
 	}
+
+	this->SetFocus();
 }
