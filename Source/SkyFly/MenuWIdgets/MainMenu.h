@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
+#include "Instruments/GameInstanceInfo.h"
 #include "MainMenu.generated.h"
 
 /**
@@ -23,5 +24,19 @@ class SKYFLY_API UMainMenu : public UUserWidget
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* ExitButton;
+
+	UPROPERTY()
+	UGameInstanceInfo* GameInstance;
+
+	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	void OnHostButtonClick();
+
+	UFUNCTION()
+	void OnJoinButtonClick();
+
+	UFUNCTION()
+	void OnExitButtonClick();
 	
 };
