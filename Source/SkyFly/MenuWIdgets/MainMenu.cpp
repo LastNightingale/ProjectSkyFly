@@ -10,19 +10,25 @@ void UMainMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	GameInstance = GetGameInstance<UGameInstanceInfo>();
+	GameInstanceRef = GetGameInstance<UGameInstanceInfo>();
+
+	HostButton->OnClicked.AddDynamic(this, &UMainMenu::OnHostButtonClick);
+	JoinButton->OnClicked.AddDynamic(this, &UMainMenu::OnJoinButtonClick);
+	ExitButton->OnClicked.AddDynamic(this, &UMainMenu::OnExitButtonClick);
 }
 
 void UMainMenu::OnHostButtonClick()
 {
-	RemoveFromParent();
-	GameInstance->ShowHostMenu();
+	if(IsInViewport())
+		RemoveFromParent();
+	GameInstanceRef->ShowHostMenu();	
 }
 
 void UMainMenu::OnJoinButtonClick()
 {
-	RemoveFromParent();
-	GameInstance->ShowJoinMenu();
+	if(IsInViewport())
+		RemoveFromParent();
+	GameInstanceRef->ShowJoinMenu();
 }
 
 void UMainMenu::OnExitButtonClick()

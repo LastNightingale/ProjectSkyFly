@@ -26,7 +26,7 @@ class SKYFLY_API UMainMenu : public UUserWidget
 	UButton* ExitButton;
 
 	UPROPERTY()
-	UGameInstanceInfo* GameInstance;
+	UGameInstanceInfo* GameInstanceRef;
 
 	virtual void NativeConstruct() override;
 

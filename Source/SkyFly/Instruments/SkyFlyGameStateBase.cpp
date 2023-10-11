@@ -7,7 +7,7 @@
 #include "Net/UnrealNetwork.h"
 
 void ASkyFlyGameStateBase::UpdatePlayerList()
-{
+{	
 	AllPlayerStates = PlayerArray;
 
 	TArray<UUserWidget*> FoundWidgets;
