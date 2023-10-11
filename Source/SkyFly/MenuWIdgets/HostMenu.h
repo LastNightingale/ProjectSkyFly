@@ -17,6 +17,7 @@ class SKYFLY_API UHostMenu : public UUserWidget
 	GENERATED_BODY()
 
 private:
+	
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* DecreasePlayersButton;
@@ -41,16 +42,38 @@ private:
 
 	UPROPERTY()
 	class UGameInstanceInfo* GameInstanceRef;
+	
+	uint8 MaxNumberOfPlayers;
+
+	bool EnabledLAN;	
 
 public:
 
-	virtual void NativeConstruct() override;
+	UPROPERTY(BlueprintReadOnly)
+	uint8 NumberOfPlayers;
+	
+	UPROPERTY(BlueprintReadOnly)
+	FText NetText;
+
+	virtual void NativeConstruct() override;	
 
 	UFUNCTION()
 	void OnBackButtonClick();
 
 	UFUNCTION()
 	void OnCreateButtonClick();
+
+	UFUNCTION()
+	void OnDecreasePlayersButtonClick();
+
+	UFUNCTION()
+	void OnIncreasePlayersButtonClick();
+
+	UFUNCTION()
+	void OnDecreaseNetButtonClick();
+
+	UFUNCTION()
+	void OnIncreaseNetButtonClick();
 
 	UFUNCTION()
 	void OnServerNameChanged(const FText& Text);

@@ -11,10 +11,19 @@ void UHostMenu::NativeConstruct()
 	GameInstanceRef = GetGameInstance<UGameInstanceInfo>();
 
 	CreateButton->SetIsEnabled(false);
+
+	NumberOfPlayers = 2;
+	MaxNumberOfPlayers = 4;
+	EnabledLAN = true;
+	NetText = FText::FromString("LAN");
 	
 	BackButton->OnClicked.AddDynamic(this, &UHostMenu::OnBackButtonClick);
 	CreateButton->OnClicked.AddDynamic(this, &UHostMenu::OnCreateButtonClick);
 	ServerName->OnTextChanged.AddDynamic(this, &UHostMenu::OnServerNameChanged);
+	IncreasePlayersButton->OnClicked.AddDynamic(this, &UHostMenu::OnIncreasePlayersButtonClick);
+	DecreasePlayersButton->OnClicked.AddDynamic(this, &UHostMenu::OnDecreasePlayersButtonClick);
+	IncreaseNetButton->OnClicked.AddDynamic(this, &UHostMenu::OnIncreaseNetButtonClick);
+	DecreaseNetButton->OnClicked.AddDynamic(this, &UHostMenu::OnDecreaseNetButtonClick);
 }
 
 void UHostMenu::OnBackButtonClick()
@@ -26,6 +35,34 @@ void UHostMenu::OnBackButtonClick()
 void UHostMenu::OnCreateButtonClick()
 {
 	GameInstanceRef->LaunchLobby(2, true, FName("Lobby"));
+}
+
+void UHostMenu::OnDecreasePlayersButtonClick()
+{
+	NumberOfPlayers = FMath::Clamp<uint8>(NumberOfPlayers - 1, 2, MaxNumberOfPlayers);
+}
+
+void UHostMenu::OnIncreasePlayersButtonClick()
+{
+	NumberOfPlayers = FMath::Clamp<uint8>(NumberOfPlayers + 1, 2, MaxNumberOfPlayers);
+}
+
+void UHostMenu::OnDecreaseNetButtonClick()
+{
+	if(!EnabledLAN)
+	{
+		EnabledLAN = true;
+		NetText = FText::FromString("LAN");
+	}
+}
+
+void UHostMenu::OnIncreaseNetButtonClick()
+{
+	if(EnabledLAN)
+	{
+		EnabledLAN = false;
+		NetText = FText::FromString("INTERNET");
+	}
 }
 
 void UHostMenu::OnServerNameChanged(const FText& Text)

@@ -101,6 +101,7 @@ void UGameInstanceInfo::CreateSession()
 	FOnlineSessionSettings SessionSettings;
 	SessionSettings.bIsLANMatch = IsLan;
 	SessionSettings.NumPublicConnections = NumberOfPlayers;
+	SessionSettings.bAllowJoinInProgress = true;
 	SessionInterface->CreateSession(0, NameOfServer, SessionSettings);
 }
 
