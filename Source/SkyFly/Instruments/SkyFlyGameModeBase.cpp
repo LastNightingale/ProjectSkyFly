@@ -77,7 +77,7 @@ void ASkyFlyGameModeBase::PostLogin(APlayerController* NewPlayer)
 	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("%d = Num"), NewPlayer->GetUniqueID()));*/
 
-	//UpdatePlayerList();
+	UpdatePlayerList();
 }
 
 void ASkyFlyGameModeBase::Logout(AController* Exiting)

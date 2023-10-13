@@ -34,7 +34,7 @@ void UHostMenu::OnBackButtonClick()
 
 void UHostMenu::OnCreateButtonClick()
 {
-	GameInstanceRef->LaunchLobby(2, true, FName("Lobby"));
+	GameInstanceRef->LaunchLobby(2, true, FName(*ServerName->Text.ToString()));
 }
 
 void UHostMenu::OnDecreasePlayersButtonClick()

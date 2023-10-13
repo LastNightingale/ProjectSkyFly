@@ -16,8 +16,7 @@ class SKYFLY_API UHostMenu : public UUserWidget
 {
 	GENERATED_BODY()
 
-private:
-	
+private:	
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* DecreasePlayersButton;

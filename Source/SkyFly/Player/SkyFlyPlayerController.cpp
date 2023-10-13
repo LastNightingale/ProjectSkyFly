@@ -6,5 +6,6 @@
 
 void ASkyFlyPlayerController::Client_KickPlayer_Implementation()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), "Minimal_Default");
+	//GetGameInstance<UGameInstanceInfo>()->DestroySession();
+	//UGameplayStatics::OpenLevel(GetWorld(), "Minimal_Default");
 }

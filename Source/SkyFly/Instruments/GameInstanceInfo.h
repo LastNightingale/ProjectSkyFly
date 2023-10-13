@@ -19,6 +19,8 @@ private:
 
 	IOnlineSessionPtr SessionInterface;
 
+	TSharedPtr<FOnlineSessionSearch> SessionSearch;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Menu")
 	TSubclassOf<class UMainMenu> MainMenuClass;
 
@@ -41,6 +43,8 @@ private:
 	
 	FName NameOfServer;
 
+	FName NameOfServerToJoin;
+
 	bool IsLan;
 
 public:
@@ -56,11 +60,17 @@ public:
 
 	void LaunchLobby(uint8 PlayerNumber, bool LAN, const FName& NameServer);
 
+	void JoinLobby(const FName& NameServer);
+
 	void ShowLoadingScreen();
 
 	virtual void Init() override;
 
 	void OnCreateSessionComplete(FName ServerName, bool Succeeded);
+	
+	void OnFindSessionComplete(bool Succeeded);
+
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 	void CreateSession();
 

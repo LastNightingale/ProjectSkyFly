@@ -63,7 +63,13 @@ void UGameInstanceInfo::LaunchLobby(uint8 PlayerNumber, bool LAN, const FName& N
 	IsLan = LAN;
 	ShowLoadingScreen();
 	CreateSession();
-	DestroySession(); //get rid of it
+	//DestroySession(); //get rid of it
+}
+
+void UGameInstanceInfo::JoinLobby(const FName& NameServer)
+{
+	NameOfServerToJoin = NameServer;
+	JoinSession();
 }
 
 void UGameInstanceInfo::ShowLoadingScreen()
@@ -82,6 +88,10 @@ void UGameInstanceInfo::Init()
 		{
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this,
 				&UGameInstanceInfo::OnCreateSessionComplete);
+			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this,
+				&UGameInstanceInfo::OnFindSessionComplete);
+			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this,
+				&UGameInstanceInfo::OnJoinSessionComplete);
 		}
 	}
 }
@@ -89,19 +99,58 @@ void UGameInstanceInfo::Init()
 void UGameInstanceInfo::OnCreateSessionComplete(FName ServerName, bool Succeeded)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("%d"), Succeeded));
+		FString::Printf(TEXT("Created: %d"), Succeeded));
 	if(Succeeded)
 	{
-		GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
+		//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
+		GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?listen");
+	}
+}
+
+void UGameInstanceInfo::OnFindSessionComplete(bool Succeeded)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue,
+		FString::Printf(TEXT("Found: %d"), Succeeded));
+	if(Succeeded)
+	{
+		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue,
+		FString::Printf(TEXT("How many found: %d"), SearchResults.Num()));
+		if(SearchResults.Num())
+		{
+			/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue,
+		FString::Printf(TEXT("Name: %s"), *SearchResults[0].Session.SessionSettings.Settings.FindRef("SERVER_NAME").Data.ToString()));
+			if(SearchResults[0].Session.SessionSettings.Settings.FindRef("SERVER_NAME").Data.ToString() == NameOfServerToJoin.ToString())*/
+				SessionInterface->JoinSession(0, NameOfServerToJoin, SearchResults[0]);
+		}
+	}
+}
+
+void UGameInstanceInfo::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	if(APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	{
+		FString JoinAddress;
+		SessionInterface->GetResolvedConnectString(SessionName, JoinAddress);
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+		FString::Printf(TEXT("Joined: %s"), *JoinAddress));
+		if(JoinAddress != "")
+			PC->ClientTravel(JoinAddress, TRAVEL_Absolute);		
 	}
 }
 
 void UGameInstanceInfo::CreateSession()
 {
 	FOnlineSessionSettings SessionSettings;
+	SessionSettings.bIsDedicated = false;
+	SessionSettings.bShouldAdvertise = true;
+	SessionSettings.bUsesPresence = true;
 	SessionSettings.bIsLANMatch = IsLan;
 	SessionSettings.NumPublicConnections = NumberOfPlayers;
 	SessionSettings.bAllowJoinInProgress = true;
+	/*SessionSettings.Settings.Add(FName("SERVER_NAME"), NameOfServer.ToString());
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Added: %s"), *NameOfServer.ToString()));*/
 	SessionInterface->CreateSession(0, NameOfServer, SessionSettings);
 }
 
@@ -112,5 +161,10 @@ void UGameInstanceInfo::DestroySession()
 
 void UGameInstanceInfo::JoinSession()
 {
-	
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	SessionSearch->bIsLanQuery = true; //LAN only, change later
+	SessionSearch->MaxSearchResults = 100; 
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+	//SessionSearch->QuerySettings.Set(FName("SESSION_NAME"), NameOfServerToJoin, EOnlineComparisonOp::Equals);
+	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
 }
