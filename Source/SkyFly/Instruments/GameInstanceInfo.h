@@ -62,6 +62,10 @@ public:
 
 	void JoinLobby(const FName& NameServer);
 
+	void SetSessionName(const FName Name);
+
+	FName GetSessionName() const;
+
 	void ShowLoadingScreen();
 
 	virtual void Init() override;

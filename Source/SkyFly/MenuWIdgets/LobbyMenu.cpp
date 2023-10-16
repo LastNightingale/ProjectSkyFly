@@ -3,13 +3,29 @@
 
 #include "MenuWIdgets/LobbyMenu.h"
 
+#include "Instruments/GameInstanceInfo.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 void ULobbyMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	StartButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnStartButtonClick);
+	LeaveButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnLeaveButtonClick);
+
 	//UpdateMenu();
+}
+
+void ULobbyMenu::OnLeaveButtonClick()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+	GetGameInstance<UGameInstanceInfo>()->DestroySession();	
+}
+
+void ULobbyMenu::OnStartButtonClick()
+{
+	
 }
 
 void ULobbyMenu::UpdateMenu()

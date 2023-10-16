@@ -22,6 +22,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Menu")
 	TSubclassOf<class ULobbyMenu> LobbyMenuClass;
+
+	UPROPERTY(ReplicatedUsing = OnSessionNameChange)
+	FName SessionName;
 	
 public:
 
@@ -30,6 +33,11 @@ public:
 	UFUNCTION(Client, reliable)	
 	void ClientUpdateLobby();	
 	void ClientUpdateLobby_Implementation();
+
+	UFUNCTION()
+	void OnSessionNameChange();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	
 };

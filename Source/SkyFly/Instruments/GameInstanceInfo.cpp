@@ -72,6 +72,16 @@ void UGameInstanceInfo::JoinLobby(const FName& NameServer)
 	JoinSession();
 }
 
+void UGameInstanceInfo::SetSessionName(const FName Name)
+{
+	NameOfServer = Name;
+}
+
+FName UGameInstanceInfo::GetSessionName() const
+{
+	return NameOfServer;
+}
+
 void UGameInstanceInfo::ShowLoadingScreen()
 {
 	
@@ -145,15 +155,15 @@ void UGameInstanceInfo::CreateSession()
 	SessionSettings.bIsLANMatch = IsLan;
 	SessionSettings.NumPublicConnections = NumberOfPlayers;
 	SessionSettings.bAllowJoinInProgress = true;
-	/*SessionSettings.Settings.Add(FName("SERVER_NAME"), NameOfServer.ToString());
+	SessionSettings.Settings.Add(FName("SERVER_NAME"), NameOfServer.ToString());
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Added: %s"), *NameOfServer.ToString()));*/
+		FString::Printf(TEXT("Added: %s"), *NameOfServer.ToString()));
 	SessionInterface->CreateSession(0, NameOfServer, SessionSettings);
 }
 
 void UGameInstanceInfo::DestroySession()
 {
-	SessionInterface->DestroySession(NameOfServer);
+	SessionInterface->DestroySession(NameOfServer);	
 }
 
 void UGameInstanceInfo::JoinSession()

@@ -32,6 +32,12 @@ public:
 
 	virtual void NativeConstruct() override;
 
+	UFUNCTION()
+	void OnLeaveButtonClick();
+
+	UFUNCTION()
+	void OnStartButtonClick();
+
 	void UpdateMenu();
 	
 };

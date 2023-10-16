@@ -4,7 +4,9 @@
 #include "Player/LobbyPlayerController.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Instruments/GameInstanceInfo.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 void ALobbyPlayerController::UpdateLobby()
 {
@@ -19,6 +21,8 @@ void ALobbyPlayerController::UpdateLobby()
 		ClientUpdateLobby();
 		return;
 	}
+
+	SessionName = GetGameInstance<UGameInstanceInfo>()->GetSessionName();
 	
 	if(!LobbyMenu)
 	{
@@ -32,7 +36,8 @@ void ALobbyPlayerController::UpdateLobby()
 
 	if(!LobbyMenu->IsInViewport())
     LobbyMenu->AddToViewport();
-    
+
+	
 
 	SetShowMouseCursor(true);
 	UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(this, LobbyMenu);	
@@ -57,4 +62,16 @@ void ALobbyPlayerController::ClientUpdateLobby_Implementation()
 
 	SetShowMouseCursor(true);
 	UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(this, LobbyMenu);
+}
+
+void ALobbyPlayerController::OnSessionNameChange()
+{	
+	GetGameInstance<UGameInstanceInfo>()->SetSessionName(SessionName);
+}
+
+void ALobbyPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ALobbyPlayerController, SessionName);
 }
