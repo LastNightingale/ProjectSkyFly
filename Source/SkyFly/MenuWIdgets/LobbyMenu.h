@@ -39,5 +39,9 @@ public:
 	void OnStartButtonClick();
 
 	void UpdateMenu();
+
+	void SetServer();
 	
 };
+
+

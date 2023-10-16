@@ -81,4 +81,6 @@ public:
 	void DestroySession();
 
 	void JoinSession();
+
+	void StartMatch();
 };

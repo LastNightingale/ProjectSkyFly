@@ -32,12 +32,11 @@ void ALobbyPlayerController::UpdateLobby()
 			return;
 		
 		LobbyMenu = CreateWidget<ULobbyMenu>(this, LobbyMenuClass);
+		LobbyMenu->SetServer();
 	}
 
 	if(!LobbyMenu->IsInViewport())
-    LobbyMenu->AddToViewport();
-
-	
+    LobbyMenu->AddToViewport();	
 
 	SetShowMouseCursor(true);
 	UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(this, LobbyMenu);	

@@ -25,7 +25,7 @@ void ULobbyMenu::OnLeaveButtonClick()
 
 void ULobbyMenu::OnStartButtonClick()
 {
-	
+	GetGameInstance<UGameInstanceInfo>()->StartMatch();
 }
 
 void ULobbyMenu::UpdateMenu()
@@ -34,4 +34,9 @@ void ULobbyMenu::UpdateMenu()
 	{
 		StartButton->SetVisibility(ESlateVisibility::Visible);
 	}*/
+}
+
+void ULobbyMenu::SetServer()
+{
+	StartButton->SetVisibility(ESlateVisibility::Visible);
 }

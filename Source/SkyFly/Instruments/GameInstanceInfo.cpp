@@ -175,3 +175,8 @@ void UGameInstanceInfo::JoinSession()
 	//SessionSearch->QuerySettings.Set(FName("SESSION_NAME"), NameOfServerToJoin, EOnlineComparisonOp::Equals);
 	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
 }
+
+void UGameInstanceInfo::StartMatch()
+{
+	GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?listen");
+}
