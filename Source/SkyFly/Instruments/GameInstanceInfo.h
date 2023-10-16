@@ -37,7 +37,7 @@ private:
 	TSubclassOf<class UHostMenu> HostMenuClass;
 
 	UPROPERTY()
-	UHostMenu* HostMenu;
+	UHostMenu* HostMenu;	
 
 	uint8 NumberOfPlayers;
 	
@@ -56,7 +56,7 @@ public:
 	void ShowHostMenu();
 
 	UFUNCTION(BlueprintCallable)
-	void ShowJoinMenu();
+	void ShowJoinMenu();	
 
 	void LaunchLobby(uint8 PlayerNumber, bool LAN, const FName& NameServer);
 

@@ -98,12 +98,12 @@ void UGameInstanceInfo::Init()
 
 void UGameInstanceInfo::OnCreateSessionComplete(FName ServerName, bool Succeeded)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Created: %d"), Succeeded));
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Created: %d"), Succeeded));*/
 	if(Succeeded)
 	{
-		//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
-		GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?listen");
+		GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
+		//GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?listen");
 	}
 }
 
@@ -117,11 +117,8 @@ void UGameInstanceInfo::OnFindSessionComplete(bool Succeeded)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue,
 		FString::Printf(TEXT("How many found: %d"), SearchResults.Num()));
 		if(SearchResults.Num())
-		{
-			/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue,
-		FString::Printf(TEXT("Name: %s"), *SearchResults[0].Session.SessionSettings.Settings.FindRef("SERVER_NAME").Data.ToString()));
-			if(SearchResults[0].Session.SessionSettings.Settings.FindRef("SERVER_NAME").Data.ToString() == NameOfServerToJoin.ToString())*/
-				SessionInterface->JoinSession(0, NameOfServerToJoin, SearchResults[0]);
+		{		
+			SessionInterface->JoinSession(0, NameOfServerToJoin, SearchResults[0]);			
 		}
 	}
 }
@@ -135,7 +132,7 @@ void UGameInstanceInfo::OnJoinSessionComplete(FName SessionName, EOnJoinSessionC
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
 		FString::Printf(TEXT("Joined: %s"), *JoinAddress));
 		if(JoinAddress != "")
-			PC->ClientTravel(JoinAddress, TRAVEL_Absolute);		
+			PC->ClientTravel(JoinAddress, TRAVEL_Absolute);
 	}
 }
 

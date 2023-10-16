@@ -13,5 +13,13 @@ UCLASS()
 class SKYFLY_API ALobbyGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+private:
+
+	
+
+public:
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 	
 };
