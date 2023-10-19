@@ -28,7 +28,12 @@ private:
 	
 public:
 
-	void UpdateLobby();	
+	UPROPERTY()
+	class ASkyFlyGameStateBase* GameStateRef; 
+
+	void UpdateLobby();
+
+	virtual void BeginPlay() override;
 
 	UFUNCTION(Client, reliable)	
 	void ClientUpdateLobby();	

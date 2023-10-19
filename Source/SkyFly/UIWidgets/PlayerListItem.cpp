@@ -2,11 +2,9 @@
 
 
 #include "PlayerListItem.h"
-
 #include "Instruments/SkyFlyGameModeBase.h"
 #include "Components/Button.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Components/TextBlock.h"
 
 void UPlayerListItem::NativeConstruct()
 {
@@ -21,8 +19,9 @@ void UPlayerListItem::NativeConstruct()
 
 	if(PlayerID == 0)
 	{
-		KickButton->SetIsEnabled(false);		
-		KickButton->SetToolTipText(FText::FromString("You can't kick yourself"));
+		//KickButton->SetIsEnabled(false);
+		KickButton->SetVisibility(ESlateVisibility::Hidden);	
+		//KickButton->SetToolTipText(FText::FromString("You can't kick yourself"));
 	}
 
 	KickButton->OnClicked.AddDynamic(this, &UPlayerListItem::OnClick);

@@ -10,20 +10,23 @@ void ASkyFlyGameStateBase::UpdatePlayerList()
 {	
 	AllPlayerStates = PlayerArray;
 
-	TArray<UUserWidget*> FoundWidgets;
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Was updated: %d"), OnPlayerListChanged.ExecuteIfBound(PlayerArray)));
+	
+
+	/*TArray<UUserWidget*> FoundWidgets;
 	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(),FoundWidgets, PlayerListClass, false);	
 
 	for(auto FoundWidget : FoundWidgets)
 	{		
 		Cast<UPlayerList>(FoundWidget)->UpdateWidget();
-	}
-	
+	}	*/
 }
 
 void ASkyFlyGameStateBase::OnRep_AllPlayerStates()
 {
-	TArray<UUserWidget*> FoundWidgets;
-	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(),FoundWidgets, PlayerListClass, false);
+	/*TArray<UUserWidget*> FoundWidgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(),FoundWidgets, PlayerListClass, false);*/
 
 	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("%d = Num"), FoundWidgets.Num()));*/
@@ -34,10 +37,14 @@ void ASkyFlyGameStateBase::OnRep_AllPlayerStates()
 	FString::Printf(TEXT("Server Func Worked")));
 	}*/
 
-	for(auto FoundWidget : FoundWidgets)
+	OnPlayerListChanged.ExecuteIfBound(AllPlayerStates);
+
+	
+
+	/*for(auto FoundWidget : FoundWidgets)
 	{		
 		Cast<UPlayerList>(FoundWidget)->UpdateWidget();
-	}
+	}*/
 }
 
 void ASkyFlyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

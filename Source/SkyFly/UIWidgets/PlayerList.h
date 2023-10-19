@@ -23,4 +23,12 @@ public:
 	TSubclassOf<UPlayerListItem> ItemClass;
 
 	void UpdateWidget();
+
+	virtual void NativeConstruct() override;
+
+	UPROPERTY()
+	const class UProjectDeveloperSettings* ProjectSettings;
+
+	UFUNCTION()
+	void OnPlayerListUpdate(TArray<APlayerState*> Players);
 };

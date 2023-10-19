@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "Components/ScrollBox.h"
+#include "UIWidgets/PlayerList.h"
 #include "LobbyMenu.generated.h"
 
 /**
@@ -26,9 +27,15 @@ private:
 	UButton* LeaveButton;
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	UScrollBox* PlayerListBox;
+	UScrollBox* PlayerListBox;	
+
+	UPROPERTY(EditDefaultsOnly, Category = "PlayerList")
+	TSubclassOf<class UPlayerList> PlayerListClass;
 	
 public:
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UPlayerList* PlayerList;
 
 	virtual void NativeConstruct() override;
 

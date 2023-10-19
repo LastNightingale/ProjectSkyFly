@@ -11,6 +11,9 @@ void ULobbyMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	PlayerList = CreateWidget<UPlayerList>(UGameplayStatics::GetPlayerController(GetWorld(),0),
+		PlayerListClass);
+
 	StartButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnStartButtonClick);
 	LeaveButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnLeaveButtonClick);
 

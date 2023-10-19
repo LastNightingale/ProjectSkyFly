@@ -7,6 +7,9 @@
 #include "GameFramework/GameStateBase.h"
 #include "SkyFlyGameStateBase.generated.h"
 
+DECLARE_DELEGATE_OneParam(FPlayerListChanged, TArray<APlayerState*>)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerListChangedClient, TArray<APlayerState*>)
+
 /**
  * 
  */
@@ -28,5 +31,9 @@ public:
 	void OnRep_AllPlayerStates();
 	
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+
+	FPlayerListChanged OnPlayerListChanged;
+
+	FPlayerListChangedClient OnPlayerListChangedClient;
 	
 };
