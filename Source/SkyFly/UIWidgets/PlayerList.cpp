@@ -41,6 +41,9 @@ void UPlayerList::OnPlayerListUpdate(TArray<APlayerState*> Players)
 	
 	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("Updated Player List")));*/
+	if(!ProjectSettings)
+		ProjectSettings = GetDefault<UProjectDeveloperSettings>();
+	
 	PlayerListScrollBox->ClearChildren();
 
 	for(uint8 Iter = 0; Iter < Players.Num(); ++Iter)

@@ -66,9 +66,9 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if(!IsLocallyControlled())
+	if(!IsLocallyControlled() && UGameplayStatics::GetPlayerPawn(GetWorld(),0))
 	{
-		const FVector Location = HealthBarWidget->GetComponentLocation();
+		const FVector Location = HealthBarWidget->GetComponentLocation();		
 		const FRotator PlayerRot = UKismetMathLibrary::FindLookAtRotation(Location,
 			UGameplayStatics::GetPlayerPawn(GetWorld(),0)->GetActorLocation());
 		HealthBarWidget->SetWorldRotation(PlayerRot);

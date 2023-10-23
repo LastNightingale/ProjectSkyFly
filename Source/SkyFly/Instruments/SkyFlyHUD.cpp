@@ -13,8 +13,9 @@ void ASkyFlyHUD::BeginPlay()
 	SwitcherWidget = CreateWidget<UPowerModeSwitcher>(GetWorld(), UISwitcherClass);
 	PlayerList = CreateWidget<UPlayerList>(GetWorld(), PlayerListClass);
 
-	/*GetWorld()->GetGameState<ASkyFlyGameStateBase>()->OnPlayerListChanged.BindUObject(PlayerList,
-		&UPlayerList::OnPlayerListUpdate);*/
+	GetWorld()->GetGameState<ASkyFlyGameStateBase>()->OnPlayerListChanged.Unbind();
+	GetWorld()->GetGameState<ASkyFlyGameStateBase>()->OnPlayerListChanged.BindUObject(PlayerList,
+		&UPlayerList::OnPlayerListUpdate);
 	
 	SwitcherWidget->AddToViewport();	
 	
