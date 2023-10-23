@@ -31,4 +31,8 @@ public:
 
 	UFUNCTION()
 	void OnPlayerListUpdate(TArray<APlayerState*> Players);
+	
+	/*UFUNCTION(Client, reliable)	
+	void ClientUpdateLobby();	
+	void ClientUpdateLobby_Implementation();*/
 };

@@ -15,29 +15,31 @@ class SKYFLY_API ALobbyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-private:
-
-	UPROPERTY()
-	ULobbyMenu* LobbyMenu;
+private:	
 
 	UPROPERTY(EditDefaultsOnly, Category = "Menu")
 	TSubclassOf<class ULobbyMenu> LobbyMenuClass;
 
 	UPROPERTY(ReplicatedUsing = OnSessionNameChange)
 	FName SessionName;
+
+	FTimerHandle TimerHandle;
 	
 public:
+
+	UPROPERTY()
+	ULobbyMenu* LobbyMenu;	
 
 	UPROPERTY()
 	class ASkyFlyGameStateBase* GameStateRef; 
 
 	void UpdateLobby();
 
-	virtual void BeginPlay() override;
-
 	UFUNCTION(Client, reliable)	
 	void ClientUpdateLobby();	
 	void ClientUpdateLobby_Implementation();
+
+	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void OnSessionNameChange();

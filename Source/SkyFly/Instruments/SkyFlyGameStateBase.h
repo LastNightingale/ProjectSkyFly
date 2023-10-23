@@ -8,7 +8,7 @@
 #include "SkyFlyGameStateBase.generated.h"
 
 DECLARE_DELEGATE_OneParam(FPlayerListChanged, TArray<APlayerState*>)
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPlayerListChangedClient, TArray<APlayerState*>)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPlayerListChangedCast, TArray<APlayerState*>, Players);
 
 /**
  * 
@@ -24,16 +24,24 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UPlayerList> PlayerListClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UPlayerList> PlayerListGameClass;
 	
 	void UpdatePlayerList();
 
+	void UpdatePlayerListGame();
+
 	UFUNCTION()
 	void OnRep_AllPlayerStates();
-	
-	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&) const override;
 
 	FPlayerListChanged OnPlayerListChanged;
 
-	FPlayerListChangedClient OnPlayerListChangedClient;
-	
+	FPlayerListChanged OnPlayerListGameChanged;	
+
+	void UpdateControllerWidget(APlayerController* NewPlayer);
+
+	//FPlayerListChangedCast OnPlayerListChangedCast;
 };

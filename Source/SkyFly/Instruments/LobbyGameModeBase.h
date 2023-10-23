@@ -22,5 +22,7 @@ private:
 public:
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	void UpdatePlayerList();
 	
 };

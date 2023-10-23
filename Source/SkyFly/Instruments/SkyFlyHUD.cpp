@@ -2,6 +2,8 @@
 
 
 #include "SkyFlyHUD.h"
+
+#include "SkyFlyGameStateBase.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"
@@ -9,7 +11,11 @@
 void ASkyFlyHUD::BeginPlay()
 {
 	SwitcherWidget = CreateWidget<UPowerModeSwitcher>(GetWorld(), UISwitcherClass);
-	PlayerList = CreateWidget<UPlayerList>(GetWorld(), PlayerListClass);	
+	PlayerList = CreateWidget<UPlayerList>(GetWorld(), PlayerListClass);
+
+	/*GetWorld()->GetGameState<ASkyFlyGameStateBase>()->OnPlayerListChanged.BindUObject(PlayerList,
+		&UPlayerList::OnPlayerListUpdate);*/
+	
 	SwitcherWidget->AddToViewport();	
 	
 	
@@ -44,6 +50,8 @@ void ASkyFlyHUD::SetUI(uint8 Index)
 
 	if (!NewWidget)
 		return;
+
+	
 
 	NewWidget->AddToViewport();
 	APlayerController* JetPlayer = GetOwningPlayerController();

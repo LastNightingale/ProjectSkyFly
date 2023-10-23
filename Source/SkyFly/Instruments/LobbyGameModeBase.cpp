@@ -8,14 +8,17 @@
 
 void ALobbyGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
-	Super::PostLogin(NewPlayer);
+	Super::PostLogin(NewPlayer);	
+	//Cast<ALobbyPlayerController>(NewPlayer)->BindPlayers();	
 
-	Cast<ALobbyPlayerController>(NewPlayer)->UpdateLobby();
+	UpdatePlayerList();
+	
+}
 
+void ALobbyGameModeBase::UpdatePlayerList()
+{
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
-	{
-		
+	{		
 		GetGameState<ASkyFlyGameStateBase>()->UpdatePlayerList();
 	}, 0.2, false);
-	
 }
