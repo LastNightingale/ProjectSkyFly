@@ -26,16 +26,15 @@ void ASkyFlyGameStateBase::UpdatePlayerList()
 	for(int Iter = 0; Iter < PlayerArray.Num(); ++Iter)
 	{
 		if(ASkyFlyJetPawn* PlayerPawn = PlayerArray[Iter]->GetPawn<ASkyFlyJetPawn>())
-		PlayerPawn->SetHealthColor(ProjectSettings->PlayerColors[Iter]);
+		{
+			PlayerPawn->HPColor = ProjectSettings->PlayerColors[Iter];
+			PlayerPawn->SetHPColor();
+		}
+		
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("Was updated: %d"), OnPlayerListChanged.ExecuteIfBound(PlayerArray)));	
-}
-
-void ASkyFlyGameStateBase::UpdatePlayerListGame()
-{
-	
 }
 
 void ASkyFlyGameStateBase::OnRep_AllPlayerStates()

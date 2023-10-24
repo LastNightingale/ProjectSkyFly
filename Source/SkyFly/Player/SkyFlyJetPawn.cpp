@@ -52,14 +52,25 @@ void ASkyFlyJetPawn::BeginPlay()
 	Super::BeginPlay();	
 
 	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->PlayerRef = this;
+	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->HealthBar->FillColorAndOpacity = HPColor;
 	
 
 	if(GetController<APlayerController>())
-	PlayerHUD = GetController<APlayerController>()->GetHUD<ASkyFlyHUD>();	
+	PlayerHUD = GetController<APlayerController>()->GetHUD<ASkyFlyHUD>();
+
+	
 	
 
 	JetMesh->OnComponentBeginOverlap.AddDynamic(this, &ASkyFlyJetPawn::OnKillZoneEnter);
 	JetMesh->OnComponentHit.AddDynamic(this, &ASkyFlyJetPawn::OnHit);
+}
+
+void ASkyFlyJetPawn::SetHPColor()
+{
+	if(UEnemyHPWidget* HPWidget = Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget()))
+	{
+		HPWidget->HealthBar->SetFillColorAndOpacity(HPColor);
+	}		
 }
 
 // Called every frame
@@ -107,6 +118,7 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASkyFlyJetPawn, CurrentLaserState);
 	DOREPLIFETIME(ASkyFlyJetPawn, CurrentPowerMode);
 	DOREPLIFETIME(ASkyFlyJetPawn, PlayerHPWidget);
+	DOREPLIFETIME(ASkyFlyJetPawn, HPColor);
 }
 
 void ASkyFlyJetPawn::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
@@ -356,14 +368,6 @@ void ASkyFlyJetPawn::Server_OnLaserFire_Implementation()
 	HandleLaser();
 }
 
-void ASkyFlyJetPawn::Client_SetHealthColor_Implementation(FLinearColor InColorAndOpacity)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("On Client Color Change : %s"), *InColorAndOpacity.ToString()));
-	
-	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->HealthBar->SetFillColorAndOpacity(InColorAndOpacity);
-}
-
 void ASkyFlyJetPawn::PowerWithdraw()
 {
 	Power -= 1.5;
@@ -410,16 +414,6 @@ float ASkyFlyJetPawn::GetHealth() const
 float ASkyFlyJetPawn::GetMaxHealth() const
 {
 	return MaxHealth;
-}
-
-void ASkyFlyJetPawn::SetHealthColor(FLinearColor InColorAndOpacity)
-{
-	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->HealthBar->SetFillColorAndOpacity(InColorAndOpacity);
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("On Client Color Change : %s"), *InColorAndOpacity.ToString()));
-
-	Client_SetHealthColor(InColorAndOpacity);
 }
 
 float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

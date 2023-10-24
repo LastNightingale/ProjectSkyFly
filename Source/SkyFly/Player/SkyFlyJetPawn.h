@@ -121,7 +121,13 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
+
+	UPROPERTY(ReplicatedUsing = SetHPColor)
+	FLinearColor HPColor;
+
+	UFUNCTION()
+	void SetHPColor();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -172,8 +178,6 @@ public:
 
 	void RestoreAmmo(uint8 Value);
 
-	void SetHealthColor(FLinearColor InColorAndOpacity);
-
 	void SpawnBullet(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 
 	UFUNCTION(Server, unreliable, WithValidation)
@@ -195,10 +199,6 @@ public:
 	void Server_OnLaserFire();
 	bool Server_OnLaserFire_Validate();
 	void Server_OnLaserFire_Implementation();
-
-	UFUNCTION(Client, Unreliable)
-	void Client_SetHealthColor(FLinearColor InColorAndOpacity);
-	void Client_SetHealthColor_Implementation(FLinearColor InColorAndOpacity);
 
 	UFUNCTION()
 	void PowerWithdraw();

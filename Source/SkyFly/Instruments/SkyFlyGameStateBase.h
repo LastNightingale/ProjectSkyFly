@@ -32,8 +32,6 @@ public:
 	
 	void UpdatePlayerList();
 
-	void UpdatePlayerListGame();
-
 	UFUNCTION()
 	void OnRep_AllPlayerStates();
 
