@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ProjectDeveloperSettings.h"
 #include "Player/SkyFlyPlayerController.h"
 #include "GameFramework/GameModeBase.h"
 #include "SkyFlyGameModeBase.generated.h"
@@ -34,6 +35,6 @@ private:
 	UPROPERTY()
 	TArray<ASkyFlyPlayerController*> AllPlayerControllers;
 
-	FTimerHandle TimerHandle;
+	FTimerHandle TimerHandle;	
 	
 };

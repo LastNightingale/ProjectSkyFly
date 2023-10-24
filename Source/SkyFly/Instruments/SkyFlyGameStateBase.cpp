@@ -2,16 +2,32 @@
 
 
 #include "SkyFlyGameStateBase.h"
+
+#include "ProjectDeveloperSettings.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/LobbyPlayerController.h"
+#include "Player/SkyFlyJetPawn.h"
+
+void ASkyFlyGameStateBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ProjectSettings = GetDefault<UProjectDeveloperSettings>();
+}
 
 void ASkyFlyGameStateBase::UpdatePlayerList()
 {	
-	AllPlayerStates = PlayerArray;	
+	AllPlayerStates = PlayerArray;
+
+	for(int Iter = 0; Iter < PlayerArray.Num(); ++Iter)
+	{
+		if(ASkyFlyJetPawn* PlayerPawn = PlayerArray[Iter]->GetPawn<ASkyFlyJetPawn>())
+		PlayerPawn->SetHealthColor(ProjectSettings->PlayerColors[Iter]);
+	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("Was updated: %d"), OnPlayerListChanged.ExecuteIfBound(PlayerArray)));	

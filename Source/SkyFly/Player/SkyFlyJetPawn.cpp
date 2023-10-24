@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
+#include "Components/ProgressBar.h"
 
 // Sets default values
 ASkyFlyJetPawn::ASkyFlyJetPawn()
@@ -355,6 +356,14 @@ void ASkyFlyJetPawn::Server_OnLaserFire_Implementation()
 	HandleLaser();
 }
 
+void ASkyFlyJetPawn::Client_SetHealthColor_Implementation(FLinearColor InColorAndOpacity)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("On Client Color Change : %s"), *InColorAndOpacity.ToString()));
+	
+	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->HealthBar->SetFillColorAndOpacity(InColorAndOpacity);
+}
+
 void ASkyFlyJetPawn::PowerWithdraw()
 {
 	Power -= 1.5;
@@ -401,6 +410,16 @@ float ASkyFlyJetPawn::GetHealth() const
 float ASkyFlyJetPawn::GetMaxHealth() const
 {
 	return MaxHealth;
+}
+
+void ASkyFlyJetPawn::SetHealthColor(FLinearColor InColorAndOpacity)
+{
+	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->HealthBar->SetFillColorAndOpacity(InColorAndOpacity);
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("On Client Color Change : %s"), *InColorAndOpacity.ToString()));
+
+	Client_SetHealthColor(InColorAndOpacity);
 }
 
 float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

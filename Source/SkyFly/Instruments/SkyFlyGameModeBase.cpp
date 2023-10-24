@@ -13,6 +13,8 @@
 void ASkyFlyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
 }
 
 void ASkyFlyGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)

@@ -103,13 +103,7 @@ public:
 	TSubclassOf<ASkyShiftLaser> LaserClass;	
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> EnemyHPWidgetClass;
-
-	/*UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UICanvas> PlayerCanvasClass;*/
-
-	/*UPROPERTY(EditDefaultsOnly)
-	class UICanvas* PlayerCanvas;*/
+	TSubclassOf<UUserWidget> EnemyHPWidgetClass;	
 		
 	UPROPERTY(Replicated)
 	ASkyShiftLaser* Laser;	
@@ -178,6 +172,8 @@ public:
 
 	void RestoreAmmo(uint8 Value);
 
+	void SetHealthColor(FLinearColor InColorAndOpacity);
+
 	void SpawnBullet(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 
 	UFUNCTION(Server, unreliable, WithValidation)
@@ -199,6 +195,10 @@ public:
 	void Server_OnLaserFire();
 	bool Server_OnLaserFire_Validate();
 	void Server_OnLaserFire_Implementation();
+
+	UFUNCTION(Client, Unreliable)
+	void Client_SetHealthColor(FLinearColor InColorAndOpacity);
+	void Client_SetHealthColor_Implementation(FLinearColor InColorAndOpacity);
 
 	UFUNCTION()
 	void PowerWithdraw();
@@ -225,7 +225,7 @@ public:
 	float GetHealth() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Counter")
-	float GetMaxHealth() const;
+	float GetMaxHealth() const;	
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 

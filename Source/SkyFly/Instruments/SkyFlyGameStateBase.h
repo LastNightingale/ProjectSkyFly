@@ -19,6 +19,8 @@ class SKYFLY_API ASkyFlyGameStateBase : public AGameStateBase
 	GENERATED_BODY()
 public:
 
+	virtual void BeginPlay() override;
+
 	UPROPERTY(ReplicatedUsing = OnRep_AllPlayerStates)
 	TArray<APlayerState*> AllPlayerStates;
 
@@ -39,9 +41,8 @@ public:
 
 	FPlayerListChanged OnPlayerListChanged;
 
-	FPlayerListChanged OnPlayerListGameChanged;	
-
 	void UpdateControllerWidget(APlayerController* NewPlayer);
 
-	//FPlayerListChangedCast OnPlayerListChangedCast;
+	UPROPERTY()
+	const UProjectDeveloperSettings* ProjectSettings;
 };
