@@ -3,71 +3,46 @@
 
 #include "SkyFlyGameModeBase.h"
 
+#include "EngineUtils.h"
 #include "SkyFlyGameStateBase.h"
 #include "Player/SkyFlyJetPawn.h"
 #include "Player/SkyFlyPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Player/GamePlayerStart.h"
 
 void ASkyFlyGameModeBase::BeginPlay()
 {
-	Super::BeginPlay();
+	Super::BeginPlay();	
+}
 
-	
+AActor* ASkyFlyGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
+{
+	/*for(TActorIterator<AGamePlayerStart> Iter(GetWorld()); Iter; ++Iter)
+	{
+		if(!Iter->IsTaken())
+		{
+			Iter->Take();
+			return *Iter;
+		}
+	}	*/
+	//return nullptr;
+	return Super::ChoosePlayerStart_Implementation(Player);
 }
 
 void ASkyFlyGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
 	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
-	
 
-	////
+	/*check(NewPlayer);
+	check(ChoosePlayerStart(NewPlayer));
 
-	//if(ASkyFlyJetPawn* ToCheck = Cast<ASkyFlyJetPawn>(NewPlayer))
-	//{
-	//	return;
-	//}
+	APawn* PlayerPawn = SpawnDefaultPawnFor(NewPlayer, ChoosePlayerStart(NewPlayer));
 
-	//if (NewPlayer->GetPawn())
-	//{
-	//	NewPlayer->GetPawn()->Destroy();
-	//}
+	check(PlayerPawn);
 
-	//FTransform SpawnTransform;
-	//TArray<AActor*> FoundEntries;
-	//UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASkyFlyJetPawn::StaticClass(), FoundEntries);
-
-	//if (FoundEntries.Num() > 0)
-	//{
-	//	SpawnTransform = FoundEntries[0]->GetActorTransform();
-	//}
-	//else
-	//{
-	//	TArray<AActor*> FoundPlayerStarts;
-	//	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), FoundPlayerStarts);
-	//	SpawnTransform = FoundPlayerStarts[0]->GetActorTransform();
-	//}
-
-	//float TempFloatX = UKismetMathLibrary::RandomBool() ? UKismetMathLibrary::RandomFloatInRange(-50.f, -150.0f) 
-	//	: UKismetMathLibrary::RandomFloatInRange(50.f, 150.0f);
-	//float TempFloatY = UKismetMathLibrary::RandomFloatInRange(-50.0f, -150.0f);
-
-	//SpawnTransform.SetLocation((SpawnTransform.GetLocation() + FVector(TempFloatX, TempFloatY, 0.f)));
-
-	//FActorSpawnParameters SpawnInfo;
-	//SpawnInfo.Owner = NewPlayer;
-	//SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-	//FVector TempLoc = SpawnTransform.GetLocation();
-	//FRotator TempRot = SpawnTransform.GetRotation().Rotator();
-
-	//UClass* JetClass = DefaultPawnClass->StaticClass();
-	//
-	//AActor* TempActor = GetWorld()->SpawnActor(JetClass, &TempLoc, &TempRot, SpawnInfo);
-	////ASkyFlyJetPawn* TempActor = Cast<ASkyFlyJetPawn>(GetWorld()->SpawnActor(ASkyFlyJetPawn::StaticClass(), &TempLoc, &TempRot, SpawnInfo));
-	//NewPlayer->Possess(Cast<APawn>(TempActor));
-	
+	NewPlayer->Possess(PlayerPawn);*/
 }
 
 void ASkyFlyGameModeBase::PostLogin(APlayerController* NewPlayer)
@@ -76,8 +51,7 @@ void ASkyFlyGameModeBase::PostLogin(APlayerController* NewPlayer)
 
 	AllPlayerControllers.Add(Cast<ASkyFlyPlayerController>(NewPlayer));
 
-	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("%d = Num"), NewPlayer->GetUniqueID()));*/
+	Cast<ASkyFlyPlayerController>(NewPlayer)->Respawn();
 
 	UpdatePlayerList();
 }

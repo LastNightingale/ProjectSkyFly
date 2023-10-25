@@ -16,6 +16,10 @@ class SKYFLY_API ASkyFlyPlayerController : public APlayerController
 
 public:
 
+	void Respawn();
+
+	AActor* FindPlayerStarts();
+
 	UFUNCTION(Client, Reliable)
 	void Client_KickPlayer();
 	void Client_KickPlayer_Implementation();
