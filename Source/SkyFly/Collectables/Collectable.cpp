@@ -51,7 +51,7 @@ void ACollectable::RestoreValue()
 
 void ACollectable::OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if ((!PickingPawn) && Cast<ASkyFlyJetPawn>(OtherActor))
+	if ((!PickingPawn) && Cast<ASkyFlyJetPawn>(OtherActor) && !Cast<ASkyFlyJetPawn>(OtherActor)->bIsGhosted)
 	{
 		PickingPawn = Cast<ASkyFlyJetPawn>(OtherActor);
 		WasPicked();

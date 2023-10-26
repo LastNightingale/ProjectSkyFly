@@ -2,6 +2,7 @@
 
 #include "SkyShiftLaser.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/SkyFlyJetPawn.h"
 
 // Sets default values
 ASkyShiftLaser::ASkyShiftLaser()

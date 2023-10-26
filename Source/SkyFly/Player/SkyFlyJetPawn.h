@@ -123,6 +123,8 @@ protected:
 
 public:
 
+	bool bIsGhosted;
+
 	UPROPERTY(ReplicatedUsing = SetHPColor)
 	FLinearColor HPColor;
 
@@ -171,6 +173,8 @@ public:
 
 	UFUNCTION()
 	void ClosePlayerPanel();
+
+	void SetGhostedPawn();
 
 	void RestorePower(float Value);
 

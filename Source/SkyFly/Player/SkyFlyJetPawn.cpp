@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
+#include "EngineUtils.h"
 #include "Components/ProgressBar.h"
 
 // Sets default values
@@ -181,6 +182,8 @@ void ASkyFlyJetPawn::Roll(float value)
 
 void ASkyFlyJetPawn::OnBulletFire()
 {
+	if(bIsGhosted)
+		return;
 
 	if (!CurrentPowerMode)
 	{
@@ -289,6 +292,18 @@ void ASkyFlyJetPawn::OpenPlayerPanel()
 void ASkyFlyJetPawn::ClosePlayerPanel()
 {
 	PlayerHUD->ClosePlayerList();
+}
+
+void ASkyFlyJetPawn::SetGhostedPawn()
+{
+	bIsGhosted = true;
+	JetMesh->SetOnlyOwnerSee(true);	
+	HealthBarWidget->SetVisibility(false);
+
+	JetMesh->SetCollisionResponseToChannel(ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	JetMesh->SetCollisionResponseToChannel(ECC_PhysicsBody, ECollisionResponse::ECR_Ignore);
+	JetMesh->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
+	JetMesh->SetCollisionResponseToChannel(ECC_Visibility, ECollisionResponse::ECR_Ignore);
 }
 
 void ASkyFlyJetPawn::RestorePower(const float Value)
@@ -422,7 +437,10 @@ float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	(Health > DamageAmount) ? Health = Health - DamageAmount : Health = 0.f;
 
 	if(PlayerHPWidget)
-	PlayerHPWidget->SetHealth(Health, MaxHealth);
+		PlayerHPWidget->SetHealth(Health, MaxHealth);
+
+	if(!Health)
+		SetGhostedPawn();
 	
 	return DamageAmount;
 }
