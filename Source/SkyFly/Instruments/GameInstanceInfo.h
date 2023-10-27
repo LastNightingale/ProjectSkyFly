@@ -83,4 +83,6 @@ public:
 	void JoinSession();
 
 	void StartMatch();
+
+	void ReturnToLobby();
 };

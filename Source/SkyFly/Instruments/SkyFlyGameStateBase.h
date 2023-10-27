@@ -43,4 +43,8 @@ public:
 
 	UPROPERTY()
 	const UProjectDeveloperSettings* ProjectSettings;
+
+	void CheckStateOfPlayers();
+
+	void EndGame();
 };

@@ -4,6 +4,7 @@
 #include "SkyFlyGameModeBase.h"
 
 #include "EngineUtils.h"
+#include "GameInstanceInfo.h"
 #include "SkyFlyGameStateBase.h"
 #include "Player/SkyFlyJetPawn.h"
 #include "Player/SkyFlyPlayerController.h"
@@ -15,34 +16,6 @@
 void ASkyFlyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();	
-}
-
-AActor* ASkyFlyGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
-{
-	/*for(TActorIterator<AGamePlayerStart> Iter(GetWorld()); Iter; ++Iter)
-	{
-		if(!Iter->IsTaken())
-		{
-			Iter->Take();
-			return *Iter;
-		}
-	}	*/
-	//return nullptr;
-	return Super::ChoosePlayerStart_Implementation(Player);
-}
-
-void ASkyFlyGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
-{
-	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
-
-	/*check(NewPlayer);
-	check(ChoosePlayerStart(NewPlayer));
-
-	APawn* PlayerPawn = SpawnDefaultPawnFor(NewPlayer, ChoosePlayerStart(NewPlayer));
-
-	check(PlayerPawn);
-
-	NewPlayer->Possess(PlayerPawn);*/
 }
 
 void ASkyFlyGameModeBase::PostLogin(APlayerController* NewPlayer)
@@ -77,4 +50,9 @@ void ASkyFlyGameModeBase::UpdatePlayerList()
 		GetGameState<ASkyFlyGameStateBase>()->UpdatePlayerList();
 	}, 0.1, false);
 	
+}
+
+void ASkyFlyGameModeBase::EndGame()
+{
+	//GetGameInstance<UGameInstanceInfo>()->ReturnToLobby();
 }

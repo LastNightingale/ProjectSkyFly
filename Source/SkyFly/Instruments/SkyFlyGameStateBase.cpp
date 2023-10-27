@@ -4,6 +4,7 @@
 #include "SkyFlyGameStateBase.h"
 
 #include "ProjectDeveloperSettings.h"
+#include "SkyFlyGameModeBase.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
@@ -11,6 +12,9 @@
 #include "Net/UnrealNetwork.h"
 #include "Player/LobbyPlayerController.h"
 #include "Player/SkyFlyJetPawn.h"
+#include "Instruments/GameInstanceInfo.h"
+
+class UGameInstanceInfo;
 
 void ASkyFlyGameStateBase::BeginPlay()
 {
@@ -29,19 +33,20 @@ void ASkyFlyGameStateBase::UpdatePlayerList()
 		{
 			PlayerPawn->HPColor = ProjectSettings->PlayerColors[Iter];
 			PlayerPawn->SetHPColor();
-		}
-		
+		}		
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Was updated: %d"), OnPlayerListChanged.ExecuteIfBound(PlayerArray)));	
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Was updated: %d"), OnPlayerListChanged.ExecuteIfBound(PlayerArray)));*/
+	OnPlayerListChanged.ExecuteIfBound(PlayerArray);
 }
 
 void ASkyFlyGameStateBase::OnRep_AllPlayerStates()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("Was updated client: %d"),
-			OnPlayerListChanged.ExecuteIfBound(PlayerArray)));
+			OnPlayerListChanged.ExecuteIfBound(PlayerArray)));*/
+	OnPlayerListChanged.ExecuteIfBound(PlayerArray);
 }
 
 void ASkyFlyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -56,4 +61,28 @@ void ASkyFlyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 void ASkyFlyGameStateBase::UpdateControllerWidget(APlayerController* NewPlayer)
 {
 	Cast<ALobbyPlayerController>(NewPlayer)->UpdateLobby();
+}
+
+void ASkyFlyGameStateBase::CheckStateOfPlayers()
+{
+	TArray<APlayerState*> Players;
+
+	for(auto Player : PlayerArray)
+	{
+		if(!Player->GetPawn<ASkyFlyJetPawn>()->bIsGhosted)
+			Players.Add(Player);
+	}
+
+	if(Players.Num() == 1)
+	{
+		EndGame();
+	}
+	
+}
+
+void ASkyFlyGameStateBase::EndGame()
+{
+	if(HasAuthority())
+		GetGameInstance<UGameInstanceInfo>()->ReturnToLobby();
+	//GetWorld()->GetAuthGameMode<ASkyFlyGameModeBase>()->EndGame();
 }

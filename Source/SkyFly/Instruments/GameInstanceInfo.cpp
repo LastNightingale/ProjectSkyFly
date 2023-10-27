@@ -112,8 +112,8 @@ void UGameInstanceInfo::OnCreateSessionComplete(FName ServerName, bool Succeeded
 		FString::Printf(TEXT("Created: %d"), Succeeded));*/
 	if(Succeeded)
 	{
-		GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
-		//GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?listen");
+		//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
+		GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game=/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen");
 	}
 }
 
@@ -178,5 +178,14 @@ void UGameInstanceInfo::JoinSession()
 
 void UGameInstanceInfo::StartMatch()
 {
-	GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?listen");
+	//GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?listen");
+	GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?game="
+						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen");
+}
+
+void UGameInstanceInfo::ReturnToLobby()
+{
+	//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
+	GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game=/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen");
+	//UGameplayStatics::OpenLevel(GetWorld(), "LobbyLevel", true, "listen");
 }

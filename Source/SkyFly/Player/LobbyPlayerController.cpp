@@ -38,6 +38,7 @@ void ALobbyPlayerController::UpdateLobby()
 
 		/*GameStateRef = GetWorld()->GetGameState<ASkyFlyGameStateBase>();*/
 
+		GameStateRef->OnPlayerListChanged.Unbind();
 		GameStateRef->OnPlayerListChanged.BindUObject(LobbyMenu->PlayerList,
 		&UPlayerList::OnPlayerListUpdate);
 	}
@@ -86,6 +87,7 @@ void ALobbyPlayerController::ClientUpdateLobby_Implementation()
 		check(LobbyMenu);
 		check(LobbyMenu->PlayerList);*/
 		/*GameStateRef = GetWorld()->GetGameState<ASkyFlyGameStateBase>();*/
+		GameStateRef->OnPlayerListChanged.Unbind();
 		GameStateRef->OnPlayerListChanged.BindUObject(LobbyMenu->PlayerList,
 			&UPlayerList::OnPlayerListUpdate);
 		

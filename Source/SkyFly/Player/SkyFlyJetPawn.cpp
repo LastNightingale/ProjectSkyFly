@@ -11,6 +11,7 @@
 #include "DrawDebugHelpers.h"
 #include "EngineUtils.h"
 #include "Components/ProgressBar.h"
+#include "Instruments/SkyFlyGameStateBase.h"
 
 // Sets default values
 ASkyFlyJetPawn::ASkyFlyJetPawn()
@@ -304,6 +305,9 @@ void ASkyFlyJetPawn::SetGhostedPawn()
 	JetMesh->SetCollisionResponseToChannel(ECC_PhysicsBody, ECollisionResponse::ECR_Ignore);
 	JetMesh->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
 	JetMesh->SetCollisionResponseToChannel(ECC_Visibility, ECollisionResponse::ECR_Ignore);
+
+	if(HasAuthority())
+		GetWorld()->GetGameState<ASkyFlyGameStateBase>()->CheckStateOfPlayers();
 }
 
 void ASkyFlyJetPawn::RestorePower(const float Value)
