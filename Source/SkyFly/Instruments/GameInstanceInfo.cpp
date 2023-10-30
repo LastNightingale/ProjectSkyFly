@@ -119,13 +119,13 @@ void UGameInstanceInfo::OnCreateSessionComplete(FName ServerName, bool Succeeded
 
 void UGameInstanceInfo::OnFindSessionComplete(bool Succeeded)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue,
-		FString::Printf(TEXT("Found: %d"), Succeeded));
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue,
+		FString::Printf(TEXT("Found: %d"), Succeeded));*/
 	if(Succeeded)
 	{
 		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue,
-		FString::Printf(TEXT("How many found: %d"), SearchResults.Num()));
+		/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue,
+		FString::Printf(TEXT("How many found: %d"), SearchResults.Num()));*/
 		if(SearchResults.Num())
 		{		
 			SessionInterface->JoinSession(0, NameOfServerToJoin, SearchResults[0]);			
@@ -139,8 +139,8 @@ void UGameInstanceInfo::OnJoinSessionComplete(FName SessionName, EOnJoinSessionC
 	{
 		FString JoinAddress;
 		SessionInterface->GetResolvedConnectString(SessionName, JoinAddress);
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-		FString::Printf(TEXT("Joined: %s"), *JoinAddress));
+		/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+		FString::Printf(TEXT("Joined: %s"), *JoinAddress));*/
 		if(JoinAddress != "")
 			PC->ClientTravel(JoinAddress, TRAVEL_Absolute);
 	}
@@ -186,6 +186,7 @@ void UGameInstanceInfo::StartMatch()
 void UGameInstanceInfo::ReturnToLobby()
 {
 	//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
-	GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game=/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen");
+	//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game=/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen", false, false);
+	GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen", true);
 	//UGameplayStatics::OpenLevel(GetWorld(), "LobbyLevel", true, "listen");
 }

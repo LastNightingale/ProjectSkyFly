@@ -20,6 +20,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -39,9 +41,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> UIWidgets[1];
 
+	void SetupHUD();
+
 	void OpenPlayerList();
 	
 	void ClosePlayerList();
+
+	void EndHUD();
 
 	void SetUI(uint8 Index);
 };

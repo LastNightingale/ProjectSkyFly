@@ -4,7 +4,13 @@
 #include "Instruments/LobbyGameModeBase.h"
 
 #include "SkyFlyGameStateBase.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Player/LobbyPlayerController.h"
+
+void ALobbyGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();	
+}
 
 void ALobbyGameModeBase::PostLogin(APlayerController* NewPlayer)
 {

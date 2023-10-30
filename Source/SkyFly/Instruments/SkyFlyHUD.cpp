@@ -6,9 +6,52 @@
 #include "SkyFlyGameStateBase.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Blueprint/WidgetTree.h"
 
 void ASkyFlyHUD::BeginPlay()
+{
+	//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Hud Beginned")));
+	
+	/*SwitcherWidget = CreateWidget<UPowerModeSwitcher>(GetWorld(), UISwitcherClass);
+	PlayerList = CreateWidget<UPlayerList>(GetWorld(), PlayerListClass);
+
+	GetWorld()->GetGameState<ASkyFlyGameStateBase>()->OnPlayerListChanged.Unbind();
+	GetWorld()->GetGameState<ASkyFlyGameStateBase>()->OnPlayerListChanged.BindUObject(PlayerList,
+		&UPlayerList::OnPlayerListUpdate);
+	
+	SwitcherWidget->AddToViewport();	
+	
+	
+	UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayerController());
+	SwitcherWidget->UISwitcher->SetActiveWidgetIndex(0);*/
+}
+
+void ASkyFlyHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{		
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Ended Before Game")));
+
+	if(SwitcherWidget)
+	{		
+		SwitcherWidget->RemoveFromParent();
+		SwitcherWidget->Destruct();
+	}
+	if(PlayerList)
+	{
+		PlayerList->RemoveFromParent();
+		PlayerList->Destruct();		
+	}
+
+	Super::EndPlay(EndPlayReason);
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Ended After Game")));
+}
+
+void ASkyFlyHUD::SetupHUD()
 {
 	SwitcherWidget = CreateWidget<UPowerModeSwitcher>(GetWorld(), UISwitcherClass);
 	PlayerList = CreateWidget<UPlayerList>(GetWorld(), PlayerListClass);
@@ -21,7 +64,7 @@ void ASkyFlyHUD::BeginPlay()
 	
 	
 	UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayerController());
-	SwitcherWidget->UISwitcher->SetActiveWidgetIndex(0);	
+	SwitcherWidget->UISwitcher->SetActiveWidgetIndex(0);
 }
 
 void ASkyFlyHUD::OpenPlayerList()
@@ -39,6 +82,23 @@ void ASkyFlyHUD::ClosePlayerList()
 	{
 		PlayerList->RemoveFromParent();
 		UWidgetBlueprintLibrary::SetInputMode_GameOnly(GetOwningPlayerController());
+	}	
+}
+
+void ASkyFlyHUD::EndHUD()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Ended Game")));
+
+	if(SwitcherWidget)
+	{		
+		SwitcherWidget->RemoveFromParent();
+		SwitcherWidget->Destruct();
+	}
+	if(PlayerList)
+	{
+		PlayerList->RemoveFromParent();
+		PlayerList->Destruct();		
 	}	
 }
 

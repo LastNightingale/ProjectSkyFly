@@ -15,6 +15,10 @@ class SKYFLY_API ALobbyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+protected:
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 private:	
 
 	UPROPERTY(EditDefaultsOnly, Category = "Menu")

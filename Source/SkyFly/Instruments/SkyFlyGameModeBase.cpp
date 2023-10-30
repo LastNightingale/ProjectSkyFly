@@ -24,7 +24,7 @@ void ASkyFlyGameModeBase::PostLogin(APlayerController* NewPlayer)
 
 	AllPlayerControllers.Add(Cast<ASkyFlyPlayerController>(NewPlayer));
 
-	Cast<ASkyFlyPlayerController>(NewPlayer)->Respawn();
+	//Cast<ASkyFlyPlayerController>(NewPlayer)->Respawn();
 
 	UpdatePlayerList();
 }
@@ -55,4 +55,17 @@ void ASkyFlyGameModeBase::UpdatePlayerList()
 void ASkyFlyGameModeBase::EndGame()
 {
 	//GetGameInstance<UGameInstanceInfo>()->ReturnToLobby();
+}
+
+AActor* ASkyFlyGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
+{
+	for(TActorIterator<AGamePlayerStart> Iter(GetWorld()); Iter; ++Iter)
+	{
+		if(!Iter->IsTaken())
+		{
+			Iter->Take();
+			return *Iter;
+		}
+	}	
+	return nullptr;
 }

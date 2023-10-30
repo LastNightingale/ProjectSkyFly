@@ -112,14 +112,19 @@ public:
 	FVector GunOffset;
 
 	UPROPERTY()
-	ASkyFlyHUD* PlayerHUD;	
+	ASkyFlyHUD* PlayerHUD;
+
+	UPROPERTY()
+	class ASkyFlyPlayerController* PlayerController;	
 
 	UPROPERTY(Replicated)
-	UEnemyHPWidget* PlayerHPWidget;	
+	UEnemyHPWidget* PlayerHPWidget;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
 

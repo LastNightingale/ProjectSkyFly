@@ -4,6 +4,7 @@
 #include "Player/LobbyPlayerController.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Instruments/GameInstanceInfo.h"
 #include "Instruments/SkyFlyGameStateBase.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -32,6 +33,8 @@ void ALobbyPlayerController::UpdateLobby()
 		
 		if(!LobbyMenuClass)
 			return;
+
+		//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 		
 		LobbyMenu = CreateWidget<ULobbyMenu>(this, LobbyMenuClass);
 		LobbyMenu->SetServer();
@@ -58,9 +61,25 @@ void ALobbyPlayerController::BeginPlay()
 
 	GameStateRef = GetWorld()->GetGameState<ASkyFlyGameStateBase>();
 
-	check(GameStateRef);
+	check(GameStateRef);	
 
 	UpdateLobby();
+}
+
+void ALobbyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Ended Lobby")));
+
+	if(LobbyMenu)
+	{
+		LobbyMenu->RemoveFromParent();
+		LobbyMenu->Destruct();
+	}
+		
+	
 }
 
 void ALobbyPlayerController::ClientUpdateLobby_Implementation()
@@ -76,6 +95,8 @@ void ALobbyPlayerController::ClientUpdateLobby_Implementation()
 	{
 		if(!LobbyMenuClass)
 			return;
+
+		//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 		
 		LobbyMenu = CreateWidget<ULobbyMenu>(this, LobbyMenuClass);
 
@@ -87,13 +108,14 @@ void ALobbyPlayerController::ClientUpdateLobby_Implementation()
 		check(LobbyMenu);
 		check(LobbyMenu->PlayerList);*/
 		/*GameStateRef = GetWorld()->GetGameState<ASkyFlyGameStateBase>();*/
+
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Lobby %d"), bool(GameStateRef)));
 		GameStateRef->OnPlayerListChanged.Unbind();
 		GameStateRef->OnPlayerListChanged.BindUObject(LobbyMenu->PlayerList,
 			&UPlayerList::OnPlayerListUpdate);
 		
 	}
-
-	//if(!LobbyMenu->IsInViewport())
 	LobbyMenu->AddToViewport();
 
 	SetShowMouseCursor(true);

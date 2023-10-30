@@ -21,6 +21,8 @@ private:
 
 public:
 
+	void BeginPlay() override;
+
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	void UpdatePlayerList();

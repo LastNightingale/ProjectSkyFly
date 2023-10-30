@@ -6,6 +6,7 @@
 #include "ProjectDeveloperSettings.h"
 #include "SkyFlyGameModeBase.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -18,7 +19,7 @@ class UGameInstanceInfo;
 
 void ASkyFlyGameStateBase::BeginPlay()
 {
-	Super::BeginPlay();
+	Super::BeginPlay();	
 
 	ProjectSettings = GetDefault<UProjectDeveloperSettings>();
 }
@@ -81,7 +82,7 @@ void ASkyFlyGameStateBase::CheckStateOfPlayers()
 }
 
 void ASkyFlyGameStateBase::EndGame()
-{
+{	
 	if(HasAuthority())
 		GetGameInstance<UGameInstanceInfo>()->ReturnToLobby();
 	//GetWorld()->GetAuthGameMode<ASkyFlyGameModeBase>()->EndGame();

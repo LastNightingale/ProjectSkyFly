@@ -28,7 +28,8 @@ void ULobbyMenu::OnLeaveButtonClick()
 
 void ULobbyMenu::OnStartButtonClick()
 {
-	GetGameInstance<UGameInstanceInfo>()->StartMatch();
+	//this->RemoveFromParent();
+	GetGameInstance<UGameInstanceInfo>()->StartMatch();	
 }
 
 void ULobbyMenu::UpdateMenu()

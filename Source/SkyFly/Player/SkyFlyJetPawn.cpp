@@ -12,7 +12,9 @@
 #include "EngineUtils.h"
 #include "Components/ProgressBar.h"
 #include "Instruments/SkyFlyGameStateBase.h"
+#include "Player/SkyFlyPlayerController.h"
 
+class ASkyFlyPlayerController;
 // Sets default values
 ASkyFlyJetPawn::ASkyFlyJetPawn()
 {
@@ -57,14 +59,32 @@ void ASkyFlyJetPawn::BeginPlay()
 	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->HealthBar->FillColorAndOpacity = HPColor;
 	
 
-	if(GetController<APlayerController>())
-	PlayerHUD = GetController<APlayerController>()->GetHUD<ASkyFlyHUD>();
-
+	if(ASkyFlyPlayerController* PC = GetController<ASkyFlyPlayerController>())
+	{
+		PlayerHUD = PC->GetHUD<ASkyFlyHUD>();
+		PlayerController = GetController<ASkyFlyPlayerController>();
+	}
 	
-	
+	if(IsLocallyControlled())
+	{
+		PlayerController->SetupHUD();
+	}	
 
 	JetMesh->OnComponentBeginOverlap.AddDynamic(this, &ASkyFlyJetPawn::OnKillZoneEnter);
 	JetMesh->OnComponentHit.AddDynamic(this, &ASkyFlyJetPawn::OnHit);
+}
+
+void ASkyFlyJetPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	
+	if(PlayerController && PlayerController->IsLocalController())
+	{		
+		PlayerController->EndHUD();
+	}
+	
+	Super::EndPlay(EndPlayReason);
+
+	
 }
 
 void ASkyFlyJetPawn::SetHPColor()
@@ -232,10 +252,14 @@ void ASkyFlyJetPawn::ChangeMode()
 		CurrentLaserState = ELaserState::FireOff; //і вирубити лазер	
 	HandleLaser();	//якщо лазер увімкнений вирубити
 
-	if (!PlayerHUD)
+	/*if (!PlayerHUD)
 		return;
 
-	PlayerHUD->SwitcherWidget->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);
+	PlayerHUD->SwitcherWidget->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);*/
+	if (!PlayerController)
+		return;
+
+	PlayerController->SwitcherWidget->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);
 
 }
 
@@ -279,15 +303,15 @@ void ASkyFlyJetPawn::DestroyLaser()
 
 void ASkyFlyJetPawn::OnPause()
 {	
-	if (!PlayerHUD)
+	if (!PlayerController)
 		return;
 
-	PlayerHUD->SetUI(EUIMode::UI_PauseMenu);	
+	PlayerController->SetUI(EUIMode::UI_PauseMenu);	
 }
 
 void ASkyFlyJetPawn::OpenPlayerPanel()
 {
-	PlayerHUD->OpenPlayerList();
+	PlayerController->OpenPlayerList();
 }
 
 void ASkyFlyJetPawn::ClosePlayerPanel()
