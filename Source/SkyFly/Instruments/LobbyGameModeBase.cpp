@@ -4,21 +4,24 @@
 #include "Instruments/LobbyGameModeBase.h"
 
 #include "SkyFlyGameStateBase.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Player/LobbyPlayerController.h"
 
-void ALobbyGameModeBase::BeginPlay()
+void ALobbyGameModeBase::GenericPlayerInitialization(AController* C)
 {
-	Super::BeginPlay();	
+	Super::GenericPlayerInitialization(C);
+
+	AllPlayerControllers.Add(Cast<ALobbyPlayerController>(C));
+
+	UpdatePlayerList();	
 }
 
-void ALobbyGameModeBase::PostLogin(APlayerController* NewPlayer)
+void ALobbyGameModeBase::Logout(AController* Exiting)
 {
-	Super::PostLogin(NewPlayer);	
-	//Cast<ALobbyPlayerController>(NewPlayer)->BindPlayers();	
+	Super::Logout(Exiting);
+
+	AllPlayerControllers.Remove(Cast<ALobbyPlayerController>(Exiting));
 
 	UpdatePlayerList();
-	
 }
 
 void ALobbyGameModeBase::UpdatePlayerList()

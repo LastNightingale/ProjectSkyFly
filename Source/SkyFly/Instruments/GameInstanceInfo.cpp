@@ -156,8 +156,8 @@ void UGameInstanceInfo::CreateSession()
 	SessionSettings.NumPublicConnections = NumberOfPlayers;
 	SessionSettings.bAllowJoinInProgress = true;
 	SessionSettings.Settings.Add(FName("SERVER_NAME"), NameOfServer.ToString());
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Added: %s"), *NameOfServer.ToString()));
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Added: %s"), *NameOfServer.ToString()));*/
 	SessionInterface->CreateSession(0, NameOfServer, SessionSettings);
 }
 
@@ -180,7 +180,7 @@ void UGameInstanceInfo::StartMatch()
 {
 	//GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?listen");
 	GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?game="
-						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen");
+						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen", true);
 }
 
 void UGameInstanceInfo::ReturnToLobby()

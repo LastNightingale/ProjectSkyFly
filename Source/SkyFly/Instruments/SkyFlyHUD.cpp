@@ -12,8 +12,6 @@
 void ASkyFlyHUD::BeginPlay()
 {
 	//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Hud Beginned")));
 	
 	/*SwitcherWidget = CreateWidget<UPowerModeSwitcher>(GetWorld(), UISwitcherClass);
 	PlayerList = CreateWidget<UPlayerList>(GetWorld(), PlayerListClass);
@@ -30,25 +28,8 @@ void ASkyFlyHUD::BeginPlay()
 }
 
 void ASkyFlyHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{		
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Ended Before Game")));
-
-	if(SwitcherWidget)
-	{		
-		SwitcherWidget->RemoveFromParent();
-		SwitcherWidget->Destruct();
-	}
-	if(PlayerList)
-	{
-		PlayerList->RemoveFromParent();
-		PlayerList->Destruct();		
-	}
-
-	Super::EndPlay(EndPlayReason);
-
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Ended After Game")));
+{
+	
 }
 
 void ASkyFlyHUD::SetupHUD()
@@ -87,8 +68,8 @@ void ASkyFlyHUD::ClosePlayerList()
 
 void ASkyFlyHUD::EndHUD()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Ended Game")));
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Ended Game")));*/
 
 	if(SwitcherWidget)
 	{		

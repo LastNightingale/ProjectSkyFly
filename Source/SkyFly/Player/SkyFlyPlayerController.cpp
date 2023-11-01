@@ -91,8 +91,8 @@ void ASkyFlyPlayerController::OpenPlayerList()
 void ASkyFlyPlayerController::EndHUD()
 {
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("END HUD")));
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("END HUD")));*/
 	
 	if(SwitcherWidget)
 	{		

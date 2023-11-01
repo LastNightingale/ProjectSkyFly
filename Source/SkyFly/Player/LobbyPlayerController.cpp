@@ -70,47 +70,22 @@ void ALobbyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Ended Lobby")));
-
 	if(LobbyMenu)
 	{
 		LobbyMenu->RemoveFromParent();
 		LobbyMenu->Destruct();
-	}
-		
+	}		
 	
 }
 
 void ALobbyPlayerController::ClientUpdateLobby_Implementation()
 {
-	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Menu: %d"), LobbyMenu != nullptr));*/
-	/*if(IsLocalController())
-	{
-		
-	}*/
-
 	if(!LobbyMenu)
 	{
 		if(!LobbyMenuClass)
 			return;
-
-		//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 		
 		LobbyMenu = CreateWidget<ULobbyMenu>(this, LobbyMenuClass);
-
-		//check(GetWorld()->GetGameState());
-
-		/*GameStateRef = GetWorld()->GetGameState<ASkyFlyGameStateBase>();
-
-		check(GameStateRef);
-		check(LobbyMenu);
-		check(LobbyMenu->PlayerList);*/
-		/*GameStateRef = GetWorld()->GetGameState<ASkyFlyGameStateBase>();*/
-
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Lobby %d"), bool(GameStateRef)));
 		GameStateRef->OnPlayerListChanged.Unbind();
 		GameStateRef->OnPlayerListChanged.BindUObject(LobbyMenu->PlayerList,
 			&UPlayerList::OnPlayerListUpdate);

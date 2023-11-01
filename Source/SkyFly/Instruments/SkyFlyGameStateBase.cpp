@@ -36,17 +36,11 @@ void ASkyFlyGameStateBase::UpdatePlayerList()
 			PlayerPawn->SetHPColor();
 		}		
 	}
-
-	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Was updated: %d"), OnPlayerListChanged.ExecuteIfBound(PlayerArray)));*/
 	OnPlayerListChanged.ExecuteIfBound(PlayerArray);
 }
 
 void ASkyFlyGameStateBase::OnRep_AllPlayerStates()
 {
-	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Was updated client: %d"),
-			OnPlayerListChanged.ExecuteIfBound(PlayerArray)));*/
 	OnPlayerListChanged.ExecuteIfBound(PlayerArray);
 }
 
@@ -61,7 +55,7 @@ void ASkyFlyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 void ASkyFlyGameStateBase::UpdateControllerWidget(APlayerController* NewPlayer)
 {
-	Cast<ALobbyPlayerController>(NewPlayer)->UpdateLobby();
+	//Cast<ALobbyPlayerController>(NewPlayer)->UpdateLobby();
 }
 
 void ASkyFlyGameStateBase::CheckStateOfPlayers()
@@ -85,5 +79,4 @@ void ASkyFlyGameStateBase::EndGame()
 {	
 	if(HasAuthority())
 		GetGameInstance<UGameInstanceInfo>()->ReturnToLobby();
-	//GetWorld()->GetAuthGameMode<ASkyFlyGameModeBase>()->EndGame();
 }

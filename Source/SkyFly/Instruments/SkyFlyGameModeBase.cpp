@@ -13,6 +13,15 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/GamePlayerStart.h"
 
+void ASkyFlyGameModeBase::GenericPlayerInitialization(AController* C)
+{
+	Super::GenericPlayerInitialization(C);
+
+	AllPlayerControllers.Add(Cast<ASkyFlyPlayerController>(C));
+
+	UpdatePlayerList();
+}
+
 void ASkyFlyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();	
@@ -23,8 +32,6 @@ void ASkyFlyGameModeBase::PostLogin(APlayerController* NewPlayer)
 	Super::PostLogin(NewPlayer);
 
 	AllPlayerControllers.Add(Cast<ASkyFlyPlayerController>(NewPlayer));
-
-	//Cast<ASkyFlyPlayerController>(NewPlayer)->Respawn();
 
 	UpdatePlayerList();
 }

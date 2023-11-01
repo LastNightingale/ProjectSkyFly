@@ -18,6 +18,8 @@ class SKYFLY_API ASkyFlyGameModeBase : public AGameModeBase
 	
 public:
 
+	virtual void GenericPlayerInitialization(AController* C) override;
+
 	virtual void BeginPlay() override;
 
 	virtual void PostLogin (APlayerController * NewPlayer) override;
