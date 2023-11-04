@@ -3,6 +3,7 @@
 
 #include "MenuWIdgets/LobbyMenu.h"
 
+#include "GameFramework/GameStateBase.h"
 #include "Instruments/GameInstanceInfo.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -16,8 +17,6 @@ void ULobbyMenu::NativeConstruct()
 
 	StartButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnStartButtonClick);
 	LeaveButton->OnClicked.AddDynamic(this, &ULobbyMenu::OnLeaveButtonClick);
-
-	//UpdateMenu();
 }
 
 void ULobbyMenu::OnLeaveButtonClick()
@@ -28,16 +27,8 @@ void ULobbyMenu::OnLeaveButtonClick()
 
 void ULobbyMenu::OnStartButtonClick()
 {
-	//this->RemoveFromParent();
-	GetGameInstance<UGameInstanceInfo>()->StartMatch();	
-}
-
-void ULobbyMenu::UpdateMenu()
-{
-	/*if(UKismetSystemLibrary::IsServer(GetWorld()))
-	{
-		StartButton->SetVisibility(ESlateVisibility::Visible);
-	}*/
+	if(GetWorld()->GetGameState()->PlayerArray.Num() > 1)
+		GetGameInstance<UGameInstanceInfo>()->StartMatch();	
 }
 
 void ULobbyMenu::SetServer()

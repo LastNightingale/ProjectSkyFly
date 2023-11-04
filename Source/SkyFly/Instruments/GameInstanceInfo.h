@@ -66,8 +66,6 @@ public:
 
 	FName GetSessionName() const;
 
-	void ShowLoadingScreen();
-
 	virtual void Init() override;
 
 	void OnCreateSessionComplete(FName ServerName, bool Succeeded);
@@ -85,4 +83,6 @@ public:
 	void StartMatch();
 
 	void ReturnToLobby();
+
+	void SetJoinable(bool bIsJoinable);
 };

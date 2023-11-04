@@ -37,7 +37,8 @@ void ALobbyPlayerController::UpdateLobby()
 		//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 		
 		LobbyMenu = CreateWidget<ULobbyMenu>(this, LobbyMenuClass);
-		LobbyMenu->SetServer();
+		if(HasAuthority())
+			LobbyMenu->SetServer();
 
 		/*GameStateRef = GetWorld()->GetGameState<ASkyFlyGameStateBase>();*/
 

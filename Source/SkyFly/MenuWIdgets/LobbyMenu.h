@@ -45,8 +45,6 @@ public:
 	UFUNCTION()
 	void OnStartButtonClick();
 
-	void UpdateMenu();
-
 	void SetServer();
 	
 };
