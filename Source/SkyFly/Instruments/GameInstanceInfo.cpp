@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystem.h"
+#include "SkyFlyGameStateBase.h"
 
 void UGameInstanceInfo::ShowMainMenu()
 {
@@ -95,6 +96,8 @@ void UGameInstanceInfo::Init()
 				&UGameInstanceInfo::OnFindSessionComplete);
 			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this,
 				&UGameInstanceInfo::OnJoinSessionComplete);
+			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this,
+				&UGameInstanceInfo::OnDestroySessionComplete);
 		}
 	}
 }
@@ -120,7 +123,7 @@ void UGameInstanceInfo::OnFindSessionComplete(bool Succeeded)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("%d"), SearchResults[0].Session.SessionSettings.bShouldAdvertise));
 			if(SearchResults[0].Session.SessionSettings.bShouldAdvertise)
-				SessionInterface->JoinSession(0, NameOfServerToJoin, SearchResults[0]);			
+				SessionInterface->JoinSession(0, "ServerName", SearchResults[0]);			
 		}
 	}
 }
@@ -139,6 +142,13 @@ void UGameInstanceInfo::OnJoinSessionComplete(FName SessionName, EOnJoinSessionC
 	}
 }
 
+void UGameInstanceInfo::OnDestroySessionComplete(FName ServerName, bool Succeeded)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+		FString::Printf(TEXT("Destroyed session: %d"), Succeeded));
+	UGameplayStatics::OpenLevel(GetWorld(), "Main Menu");
+}
+
 void UGameInstanceInfo::CreateSession()
 {
 	FOnlineSessionSettings SessionSettings;
@@ -149,14 +159,15 @@ void UGameInstanceInfo::CreateSession()
 	SessionSettings.NumPublicConnections = NumberOfPlayers;
 	SessionSettings.NumPrivateConnections = 0;
 	SessionSettings.bAllowJoinInProgress = true;
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("%s"), *NameOfServer.ToString()));
-	SessionInterface->CreateSession(0, NameOfServer, SessionSettings);
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("%s"), *NameOfServer.ToString()));*/
+	//SessionInterface->CreateSession(0, NameOfServer, SessionSettings);
+	SessionInterface->CreateSession(0, "ServerName", SessionSettings);
 }
 
 void UGameInstanceInfo::DestroySession()
 {
-	SessionInterface->DestroySession(NameOfServer);	
+	SessionInterface->DestroySession("ServerName");	
 }
 
 void UGameInstanceInfo::JoinSession()
@@ -175,10 +186,10 @@ void UGameInstanceInfo::StartMatch()
 	SetJoinable(false);
 	if(SessionInterface)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("%d, %d, %d"), SessionInterface->GetSessionSettings(NameOfServer)->bAllowJoinInProgress,
 			SessionInterface->GetSessionSettings(NameOfServer)->bShouldAdvertise,
-			SessionInterface->GetSessionSettings(NameOfServer)->bUsesPresence));
+			SessionInterface->GetSessionSettings(NameOfServer)->bUsesPresence));*/
 	}
 	GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?game="
 						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen", true);
@@ -188,16 +199,21 @@ void UGameInstanceInfo::ReturnToLobby()
 {
 	//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
 	//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game=/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen", false, false);
+	SetJoinable(CheckConnectionAmount());
 	GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen", true);
-	//UGameplayStatics::OpenLevel(GetWorld(), "LobbyLevel", true, "listen");
 }
 
 void UGameInstanceInfo::SetJoinable(bool bIsJoinable)
 {
 	if(SessionInterface)
 	{
-		SessionInterface->GetSessionSettings(NameOfServer)->bAllowJoinInProgress = bIsJoinable;
-		SessionInterface->GetSessionSettings(NameOfServer)->bShouldAdvertise = bIsJoinable;
-		SessionInterface->GetSessionSettings(NameOfServer)->bUsesPresence = bIsJoinable;
+		SessionInterface->GetSessionSettings("ServerName")->bAllowJoinInProgress = bIsJoinable;
+		SessionInterface->GetSessionSettings("ServerName")->bShouldAdvertise = bIsJoinable;
+		SessionInterface->GetSessionSettings("ServerName")->bUsesPresence = bIsJoinable;
 	}
+}
+
+bool UGameInstanceInfo::CheckConnectionAmount()
+{
+	return GetWorld()->GetGameState<ASkyFlyGameStateBase>()->AllPlayerStates.Num() < NumberOfPlayers;
 }

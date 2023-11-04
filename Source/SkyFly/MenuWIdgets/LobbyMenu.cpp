@@ -5,6 +5,8 @@
 
 #include "GameFramework/GameStateBase.h"
 #include "Instruments/GameInstanceInfo.h"
+#include "Instruments/LobbyGameModeBase.h"
+#include "Instruments/SkyFlyGameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -20,8 +22,14 @@ void ULobbyMenu::NativeConstruct()
 }
 
 void ULobbyMenu::OnLeaveButtonClick()
-{
-	UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+{	
+	if(UKismetSystemLibrary::IsServer(GetWorld()))
+	{
+		for(int Iter = GetWorld()->GetGameState<ASkyFlyGameStateBase>()->AllPlayerStates.Num() - 1; Iter > 0; Iter--)
+		{
+			GetWorld()->GetAuthGameMode<ALobbyGameModeBase>()->KickPlayer(Iter);
+		}			
+	}
 	GetGameInstance<UGameInstanceInfo>()->DestroySession();	
 }
 

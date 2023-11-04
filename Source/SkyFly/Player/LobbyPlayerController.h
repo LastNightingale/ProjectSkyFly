@@ -43,6 +43,10 @@ public:
 	void ClientUpdateLobby();	
 	void ClientUpdateLobby_Implementation();
 
+	UFUNCTION(Client, Reliable)
+	void Client_KickPlayer();
+	void Client_KickPlayer_Implementation();
+
 	virtual void BeginPlay() override;
 
 	UFUNCTION()

@@ -47,15 +47,15 @@ private:
 
 	bool IsLan;
 
-public:
+public:	
 
 	UFUNCTION(BlueprintCallable)
 	void ShowMainMenu();
 
-	UFUNCTION(BlueprintCallable)
+	//UFUNCTION(BluepringPure)
 	void ShowHostMenu();
 
-	UFUNCTION(BlueprintCallable)
+	//UFUNCTION(BluepringPure)
 	void ShowJoinMenu();	
 
 	void LaunchLobby(uint8 PlayerNumber, bool LAN, const FName& NameServer);
@@ -74,6 +74,8 @@ public:
 
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
+	void OnDestroySessionComplete(FName ServerName, bool Succeeded);
+
 	void CreateSession();
 
 	void DestroySession();
@@ -85,4 +87,6 @@ public:
 	void ReturnToLobby();
 
 	void SetJoinable(bool bIsJoinable);
+
+	bool CheckConnectionAmount();
 };

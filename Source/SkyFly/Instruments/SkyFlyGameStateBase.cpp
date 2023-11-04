@@ -37,6 +37,13 @@ void ASkyFlyGameStateBase::UpdatePlayerList()
 		}		
 	}
 	OnPlayerListChanged.ExecuteIfBound(PlayerArray);
+
+	if(AllPlayerStates.Num() > 1 && HasAuthority())
+	{
+		auto GI = GetGameInstance<UGameInstanceInfo>();
+		GI->SetJoinable(GI->CheckConnectionAmount());
+	}
+		
 }
 
 void ASkyFlyGameStateBase::OnRep_AllPlayerStates()

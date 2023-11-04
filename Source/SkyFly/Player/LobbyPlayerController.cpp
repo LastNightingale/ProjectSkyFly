@@ -7,6 +7,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Instruments/GameInstanceInfo.h"
 #include "Instruments/SkyFlyGameStateBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 
@@ -54,6 +55,12 @@ void ALobbyPlayerController::UpdateLobby()
 
 	SetShowMouseCursor(true);
 	UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(this, LobbyMenu);		
+}
+
+void ALobbyPlayerController::Client_KickPlayer_Implementation()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+	GetGameInstance<UGameInstanceInfo>()->DestroySession();
 }
 
 void ALobbyPlayerController::BeginPlay()

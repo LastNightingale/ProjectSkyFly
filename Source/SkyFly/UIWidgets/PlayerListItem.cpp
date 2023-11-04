@@ -4,6 +4,7 @@
 #include "PlayerListItem.h"
 #include "Instruments/SkyFlyGameModeBase.h"
 #include "Components/Button.h"
+#include "Instruments/LobbyGameModeBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 void UPlayerListItem::NativeConstruct()
@@ -19,9 +20,7 @@ void UPlayerListItem::NativeConstruct()
 
 	if(PlayerID == 0)
 	{
-		//KickButton->SetIsEnabled(false);
-		KickButton->SetVisibility(ESlateVisibility::Hidden);	
-		//KickButton->SetToolTipText(FText::FromString("You can't kick yourself"));
+		KickButton->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	KickButton->OnClicked.AddDynamic(this, &UPlayerListItem::OnClick);
@@ -29,5 +28,12 @@ void UPlayerListItem::NativeConstruct()
 
 void UPlayerListItem::OnClick()
 {
-	GetWorld()->GetAuthGameMode<ASkyFlyGameModeBase>()->KickPlayer(PlayerID);
+	if(auto SGM = GetWorld()->GetAuthGameMode<ASkyFlyGameModeBase>())
+	{
+		SGM->KickPlayer(PlayerID);
+	}		
+	else if (auto LGM =GetWorld()->GetAuthGameMode<ALobbyGameModeBase>())
+	{
+		LGM->KickPlayer(PlayerID);
+	}
 }

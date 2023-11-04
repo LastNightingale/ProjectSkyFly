@@ -25,6 +25,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	class UTextBlock* UsernameText;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Server")
+	TSubclassOf<AGameModeBase> GameModeClass;
+
 	FText Text;
 
 	uint8 PlayerID;

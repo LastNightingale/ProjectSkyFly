@@ -25,6 +25,8 @@ public:
 
 	virtual void Logout(AController* Exiting) override;
 
+	void KickPlayer(uint8 PlayerID);
+
 	void UpdatePlayerList();
 
 	UPROPERTY()

@@ -14,5 +14,8 @@
 				"DeveloperSettings"
 			]
 		}
+	],
+	"TargetPlatforms": [
+		"WindowsNoEditor"
 	]
 }

@@ -24,6 +24,11 @@ void ALobbyGameModeBase::Logout(AController* Exiting)
 	UpdatePlayerList();
 }
 
+void ALobbyGameModeBase::KickPlayer(uint8 PlayerID)
+{
+	AllPlayerControllers[PlayerID]->Client_KickPlayer();
+}
+
 void ALobbyGameModeBase::UpdatePlayerList()
 {
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
