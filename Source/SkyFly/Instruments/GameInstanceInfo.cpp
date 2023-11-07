@@ -120,10 +120,10 @@ void UGameInstanceInfo::OnFindSessionComplete(bool Succeeded)
 		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
 		if(SearchResults.Num())
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("%d"), SearchResults[0].Session.SessionSettings.bShouldAdvertise));
-			if(SearchResults[0].Session.SessionSettings.bShouldAdvertise)
-				SessionInterface->JoinSession(0, "ServerName", SearchResults[0]);			
+			/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("%d"), SearchResults[0].Session.SessionSettings.bShouldAdvertise));*/
+			//if(SearchResults[0].Session.SessionSettings.bShouldAdvertise)
+			SessionInterface->JoinSession(0, "ServerName", SearchResults[0]);			
 		}
 	}
 }
@@ -144,8 +144,8 @@ void UGameInstanceInfo::OnJoinSessionComplete(FName SessionName, EOnJoinSessionC
 
 void UGameInstanceInfo::OnDestroySessionComplete(FName ServerName, bool Succeeded)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
-		FString::Printf(TEXT("Destroyed session: %d"), Succeeded));
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+		FString::Printf(TEXT("Destroyed session: %d"), Succeeded));*/
 	UGameplayStatics::OpenLevel(GetWorld(), "Main Menu");
 }
 
@@ -155,10 +155,11 @@ void UGameInstanceInfo::CreateSession()
 	SessionSettings.bIsDedicated = false;
 	SessionSettings.bShouldAdvertise = true;
 	SessionSettings.bUsesPresence = true;
-	SessionSettings.bIsLANMatch = IsLan;
+	SessionSettings.bIsLANMatch = false;
 	SessionSettings.NumPublicConnections = NumberOfPlayers;
 	SessionSettings.NumPrivateConnections = 0;
 	SessionSettings.bAllowJoinInProgress = true;
+	SessionSettings.bUseLobbiesIfAvailable = true;
 	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("%s"), *NameOfServer.ToString()));*/
 	//SessionInterface->CreateSession(0, NameOfServer, SessionSettings);
@@ -173,8 +174,9 @@ void UGameInstanceInfo::DestroySession()
 void UGameInstanceInfo::JoinSession()
 {
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
-	SessionSearch->bIsLanQuery = true;
-	SessionSearch->MaxSearchResults = 100; 
+	//SessionSearch->bIsLanQuery = true;
+	SessionSearch->bIsLanQuery = false;
+	SessionSearch->MaxSearchResults = 150000; 
 	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 	//SessionSearch->QuerySettings.Set(FName("SESSION_NAME"), NameOfServerToJoin, EOnlineComparisonOp::Equals);
 	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
@@ -205,12 +207,12 @@ void UGameInstanceInfo::ReturnToLobby()
 
 void UGameInstanceInfo::SetJoinable(bool bIsJoinable)
 {
-	if(SessionInterface)
+	/*if(SessionInterface)
 	{
 		SessionInterface->GetSessionSettings("ServerName")->bAllowJoinInProgress = bIsJoinable;
 		SessionInterface->GetSessionSettings("ServerName")->bShouldAdvertise = bIsJoinable;
 		SessionInterface->GetSessionSettings("ServerName")->bUsesPresence = bIsJoinable;
-	}
+	}*/
 }
 
 bool UGameInstanceInfo::CheckConnectionAmount()

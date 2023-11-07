@@ -27,8 +27,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* BackButton;
 	
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	UEditableTextBox* ServerName;
+	/*UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UEditableTextBox* ServerName;*/
 
 public:
 

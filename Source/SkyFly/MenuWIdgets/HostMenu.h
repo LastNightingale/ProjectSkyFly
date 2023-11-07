@@ -24,11 +24,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* IncreasePlayersButton;
 
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	/*UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* DecreaseNetButton;
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	UButton* IncreaseNetButton;
+	UButton* IncreaseNetButton;*/
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* CreateButton;
@@ -36,8 +36,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* BackButton;
 	
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	UEditableTextBox* ServerName;
+	/*UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UEditableTextBox* ServerName;*/
 
 	UPROPERTY()
 	class UGameInstanceInfo* GameInstanceRef;

@@ -10,7 +10,7 @@ void UHostMenu::NativeConstruct()
 
 	GameInstanceRef = GetGameInstance<UGameInstanceInfo>();
 
-	CreateButton->SetIsEnabled(false);
+	//CreateButton->SetIsEnabled(false);
 
 	NumberOfPlayers = 2;
 	MaxNumberOfPlayers = 4;
@@ -19,11 +19,11 @@ void UHostMenu::NativeConstruct()
 	
 	BackButton->OnClicked.AddDynamic(this, &UHostMenu::OnBackButtonClick);
 	CreateButton->OnClicked.AddDynamic(this, &UHostMenu::OnCreateButtonClick);
-	ServerName->OnTextChanged.AddDynamic(this, &UHostMenu::OnServerNameChanged);
+	//ServerName->OnTextChanged.AddDynamic(this, &UHostMenu::OnServerNameChanged);
 	IncreasePlayersButton->OnClicked.AddDynamic(this, &UHostMenu::OnIncreasePlayersButtonClick);
 	DecreasePlayersButton->OnClicked.AddDynamic(this, &UHostMenu::OnDecreasePlayersButtonClick);
-	IncreaseNetButton->OnClicked.AddDynamic(this, &UHostMenu::OnIncreaseNetButtonClick);
-	DecreaseNetButton->OnClicked.AddDynamic(this, &UHostMenu::OnDecreaseNetButtonClick);
+	/*IncreaseNetButton->OnClicked.AddDynamic(this, &UHostMenu::OnIncreaseNetButtonClick);
+	DecreaseNetButton->OnClicked.AddDynamic(this, &UHostMenu::OnDecreaseNetButtonClick);*/
 }
 
 void UHostMenu::OnBackButtonClick()
@@ -34,7 +34,7 @@ void UHostMenu::OnBackButtonClick()
 
 void UHostMenu::OnCreateButtonClick()
 {
-	GameInstanceRef->LaunchLobby(2, true, FName(*ServerName->Text.ToString()));
+	GameInstanceRef->LaunchLobby(2, false, "ServerName");
 }
 
 void UHostMenu::OnDecreasePlayersButtonClick()
