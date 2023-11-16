@@ -3,6 +3,7 @@
 
 #include "MenuWIdgets/HostMenu.h"
 #include "Instruments/GameInstanceInfo.h"
+#include "Player/MenuPlayerController.h"
 
 void UHostMenu::NativeConstruct()
 {
@@ -29,12 +30,13 @@ void UHostMenu::NativeConstruct()
 void UHostMenu::OnBackButtonClick()
 {
 	RemoveFromParent();
-	GameInstanceRef->ShowMainMenu();
+	//GameInstanceRef->ShowMainMenu();
+	this->GetOwningPlayer<AMenuPlayerController>()->ShowMainMenu();
 }
 
 void UHostMenu::OnCreateButtonClick()
 {
-	GameInstanceRef->LaunchLobby(2, false, "ServerName");
+	GameInstanceRef->LaunchLobby(4, false, "ServerName");
 }
 
 void UHostMenu::OnDecreasePlayersButtonClick()

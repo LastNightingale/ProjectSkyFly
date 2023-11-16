@@ -34,7 +34,5 @@ void UPauseMenu::OnQuitButtonClick()
 			GetWorld()->GetAuthGameMode<ASkyFlyGameModeBase>()->KickPlayer(Iter);
 		}			
 	}
-	GetGameInstance<UGameInstanceInfo>()->DestroySession();	
-	/*UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0),
-		EQuitPreference::Quit, true);*/
+	GetGameInstance<UGameInstanceInfo>()->DestroySession();
 }

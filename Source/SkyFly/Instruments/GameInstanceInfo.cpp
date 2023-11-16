@@ -12,7 +12,7 @@
 #include "OnlineSubsystem.h"
 #include "SkyFlyGameStateBase.h"
 
-void UGameInstanceInfo::ShowMainMenu()
+/*void UGameInstanceInfo::ShowMainMenu()
 {
 	if(!MainMenu)
 	{
@@ -55,7 +55,7 @@ void UGameInstanceInfo::ShowJoinMenu()
 	CreateWidget<UJoinMenu>(UGameplayStatics::GetPlayerController(GetWorld(), 0),
 		JoinMenuClass)->AddToViewport();
 	
-}
+}*/
 
 void UGameInstanceInfo::LaunchLobby(uint8 PlayerNumber, bool LAN, const FName& NameServer)
 {
@@ -109,6 +109,7 @@ void UGameInstanceInfo::OnCreateSessionComplete(FName ServerName, bool Succeeded
 	if(Succeeded)
 	{
 		//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
+		GetWorld()->
 		GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game=/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen");
 	}
 }
@@ -117,19 +118,25 @@ void UGameInstanceInfo::OnFindSessionComplete(bool Succeeded)
 {
 	if(Succeeded)
 	{
+		/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Find")));*/
 		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
 		if(SearchResults.Num())
 		{
 			/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Found")));*/
+			/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("%d"), SearchResults[0].Session.SessionSettings.bShouldAdvertise));*/
 			//if(SearchResults[0].Session.SessionSettings.bShouldAdvertise)
-			SessionInterface->JoinSession(0, "ServerName", SearchResults[0]);			
+			SessionInterface->JoinSession(0, TEXT("ServerName"), SearchResults[0]);			
 		}
 	}
 }
 
 void UGameInstanceInfo::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
 {
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Joined")));*/
 	if(APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
 	{
 		FString JoinAddress;
@@ -146,7 +153,7 @@ void UGameInstanceInfo::OnDestroySessionComplete(FName ServerName, bool Succeede
 {
 	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
 		FString::Printf(TEXT("Destroyed session: %d"), Succeeded));*/
-	UGameplayStatics::OpenLevel(GetWorld(), "Main Menu");
+	UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
 }
 
 void UGameInstanceInfo::CreateSession()
@@ -155,28 +162,33 @@ void UGameInstanceInfo::CreateSession()
 	SessionSettings.bIsDedicated = false;
 	SessionSettings.bShouldAdvertise = true;
 	SessionSettings.bUsesPresence = true;
-	SessionSettings.bIsLANMatch = false;
+	//SessionSettings.bIsLANMatch = false;
+	SessionSettings.bIsLANMatch = true;
 	SessionSettings.NumPublicConnections = NumberOfPlayers;
+	//SessionSettings.NumPublicConnections = 4;
 	SessionSettings.NumPrivateConnections = 0;
 	SessionSettings.bAllowJoinInProgress = true;
+	SessionSettings.bAllowJoinViaPresence = true;
 	SessionSettings.bUseLobbiesIfAvailable = true;
 	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
 		FString::Printf(TEXT("%s"), *NameOfServer.ToString()));*/
 	//SessionInterface->CreateSession(0, NameOfServer, SessionSettings);
-	SessionInterface->CreateSession(0, "ServerName", SessionSettings);
+	SessionInterface->CreateSession(0, TEXT("ServerName"), SessionSettings);
 }
 
 void UGameInstanceInfo::DestroySession()
 {
-	SessionInterface->DestroySession("ServerName");	
+	SessionInterface->DestroySession(TEXT("ServerName"));	
 }
 
 void UGameInstanceInfo::JoinSession()
 {
+	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+		FString::Printf(TEXT("Start join")));*/
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
-	//SessionSearch->bIsLanQuery = true;
-	SessionSearch->bIsLanQuery = false;
-	SessionSearch->MaxSearchResults = 150000; 
+	SessionSearch->bIsLanQuery = true;
+	//SessionSearch->bIsLanQuery = false;
+	SessionSearch->MaxSearchResults = 200000; 
 	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 	//SessionSearch->QuerySettings.Set(FName("SESSION_NAME"), NameOfServerToJoin, EOnlineComparisonOp::Equals);
 	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
@@ -186,13 +198,6 @@ void UGameInstanceInfo::StartMatch()
 {
 	//GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?listen");
 	SetJoinable(false);
-	if(SessionInterface)
-	{
-		/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("%d, %d, %d"), SessionInterface->GetSessionSettings(NameOfServer)->bAllowJoinInProgress,
-			SessionInterface->GetSessionSettings(NameOfServer)->bShouldAdvertise,
-			SessionInterface->GetSessionSettings(NameOfServer)->bUsesPresence));*/
-	}
 	GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?game="
 						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen", true);
 }
@@ -201,8 +206,9 @@ void UGameInstanceInfo::ReturnToLobby()
 {
 	//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
 	//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game=/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen", false, false);
-	SetJoinable(CheckConnectionAmount());
-	GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen", true);
+	//SetJoinable(CheckConnectionAmount());
+	GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game="
+						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen");
 }
 
 void UGameInstanceInfo::SetJoinable(bool bIsJoinable)

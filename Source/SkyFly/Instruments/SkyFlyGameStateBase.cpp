@@ -28,21 +28,24 @@ void ASkyFlyGameStateBase::UpdatePlayerList()
 {	
 	AllPlayerStates = PlayerArray;
 
+	AllPlayerNames.Empty();
+
 	for(int Iter = 0; Iter < PlayerArray.Num(); ++Iter)
 	{
+		AllPlayerNames.Add(PlayerArray[Iter]->GetPlayerName());
 		if(ASkyFlyJetPawn* PlayerPawn = PlayerArray[Iter]->GetPawn<ASkyFlyJetPawn>())
 		{
 			PlayerPawn->HPColor = ProjectSettings->PlayerColors[Iter];
 			PlayerPawn->SetHPColor();
 		}		
 	}
-	OnPlayerListChanged.ExecuteIfBound(PlayerArray);
+	OnPlayerListChanged.ExecuteIfBound(AllPlayerStates);
 
-	if(AllPlayerStates.Num() > 1 && HasAuthority())
+	/*if(AllPlayerStates.Num() > 1 && HasAuthority())
 	{
 		auto GI = GetGameInstance<UGameInstanceInfo>();
 		GI->SetJoinable(GI->CheckConnectionAmount());
-	}
+	}*/
 		
 }
 
@@ -56,6 +59,7 @@ void ASkyFlyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASkyFlyGameStateBase, AllPlayerStates);
+	DOREPLIFETIME(ASkyFlyGameStateBase, AllPlayerNames);
 }
 
 

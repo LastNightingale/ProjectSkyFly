@@ -38,11 +38,13 @@ void ASkyFlyGameModeBase::PostLogin(APlayerController* NewPlayer)
 
 void ASkyFlyGameModeBase::Logout(AController* Exiting)
 {
-	Super::Logout(Exiting);
+	if(!Cast<APlayerController>(Exiting)->HasAuthority())
+	{
+		AllPlayerControllers.Remove(Cast<ASkyFlyPlayerController>(Exiting));
 
-	AllPlayerControllers.Remove(Cast<ASkyFlyPlayerController>(Exiting));
-
-	UpdatePlayerList();
+		UpdatePlayerList();
+	}
+	Super::Logout(Exiting);	
 }
 
 void ASkyFlyGameModeBase::KickPlayer(uint8 PlayerID)
@@ -55,7 +57,7 @@ void ASkyFlyGameModeBase::UpdatePlayerList()
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
 	{
 		GetGameState<ASkyFlyGameStateBase>()->UpdatePlayerList();
-	}, 0.1, false);
+	}, 0.3, false);
 	
 }
 

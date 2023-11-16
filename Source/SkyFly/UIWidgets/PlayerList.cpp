@@ -21,6 +21,7 @@ void UPlayerList::UpdateWidget()
 	for(uint8 Iter = 0; Iter < Players.Num(); ++Iter)
 	{
 		const auto CurrentWidget = Cast<UPlayerListItem>(CreateWidget(GetOwningPlayer(),ItemClass));
+		UE_LOG(LogTemp, Warning, TEXT("Iter: %d, %s"), Iter, *Players[Iter]->GetPlayerName());
 		CurrentWidget->Text = FText::FromString(Players[Iter]->GetPlayerName());
 		CurrentWidget->PlayerID = Iter;
 		PlayerListScrollBox->AddChild(CurrentWidget);
@@ -43,13 +44,16 @@ void UPlayerList::OnPlayerListUpdate(TArray<APlayerState*> Players)
 		FString::Printf(TEXT("Updated Player List")));*/
 	if(!ProjectSettings)
 		ProjectSettings = GetDefault<UProjectDeveloperSettings>();
+
+	//new
+	auto StatePlayers = GetWorld()->GetGameState<ASkyFlyGameStateBase>()->AllPlayerNames;
 	
 	PlayerListScrollBox->ClearChildren();
 
-	for(uint8 Iter = 0; Iter < Players.Num(); ++Iter)
+	for(uint8 Iter = 0; Iter < StatePlayers.Num(); ++Iter)
 	{
 		const auto CurrentWidget = Cast<UPlayerListItem>(CreateWidget(GetOwningPlayer(),ItemClass));
-		CurrentWidget->Text = FText::FromString(Players[Iter]->GetPlayerName());
+		CurrentWidget->Text = FText::FromString(StatePlayers[Iter]);
 		CurrentWidget->UsernameText->SetColorAndOpacity(FLinearColor(ProjectSettings->PlayerColors[Iter]));
 		CurrentWidget->PlayerID = Iter;
 		PlayerListScrollBox->AddChild(CurrentWidget);

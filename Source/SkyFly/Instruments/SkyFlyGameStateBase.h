@@ -24,6 +24,9 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_AllPlayerStates)
 	TArray<APlayerState*> AllPlayerStates;
 
+	UPROPERTY(Replicated)
+	TArray<FString> AllPlayerNames;
+
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UPlayerList> PlayerListClass;
 

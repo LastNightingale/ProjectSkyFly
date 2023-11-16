@@ -189,24 +189,32 @@ public:
 
 	void SpawnBullet(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 
-	UFUNCTION(Server, unreliable, WithValidation)
+	UFUNCTION(Server, Unreliable)
 	void Server_OnBulletFire(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
-	bool Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 	void Server_OnBulletFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction);
 
-	UFUNCTION(Server, unreliable, WithValidation)
+	UFUNCTION(Server, unreliable)
 	void Server_SetRotation(FVector Direction, float value);
-	bool Server_SetRotation_Validate(FVector Direction, float value);
 	void Server_SetRotation_Implementation(FVector Direction, float value);
 
-	UFUNCTION(Server, unreliable, WithValidation)
+	UFUNCTION(Server, unreliable)
+	void Server_MoveUp(float value);
+	void Server_MoveUp_Implementation(float value);
+
+	UFUNCTION(Server, unreliable)
+	void Server_MoveRight(float value);
+	void Server_MoveRight_Implementation(float value);
+
+	UFUNCTION(Server, unreliable)
+	void Server_Roll(float value);
+	void Server_Roll_Implementation(float value);
+
+	UFUNCTION(Server, unreliable)
 	void Server_SetLinearVelocity(FVector NewVelocity);
-	bool Server_SetLinearVelocity_Validate(FVector NewVelocity);
 	void Server_SetLinearVelocity_Implementation(FVector NewVelocity);
 	
-	UFUNCTION(Server, unreliable, WithValidation)
+	UFUNCTION(Server, unreliable)
 	void Server_OnLaserFire();
-	bool Server_OnLaserFire_Validate();
 	void Server_OnLaserFire_Implementation();
 
 	UFUNCTION()

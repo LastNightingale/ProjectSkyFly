@@ -31,5 +31,7 @@ public:
 
 	UPROPERTY()
 	TArray<class ALobbyPlayerController*> AllPlayerControllers;
+
+	void ResetTimer();
 	
 };

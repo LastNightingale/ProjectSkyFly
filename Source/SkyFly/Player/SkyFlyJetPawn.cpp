@@ -53,7 +53,9 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 // Called when the game starts or when spawned
 void ASkyFlyJetPawn::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
+
+	
 
 	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->PlayerRef = this;
 	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->HealthBar->FillColorAndOpacity = HPColor;
@@ -132,8 +134,8 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
-	DOREPLIFETIME(ASkyFlyJetPawn, ForwardVelocity);
+	/*DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
+	DOREPLIFETIME(ASkyFlyJetPawn, ForwardVelocity);*/
 	DOREPLIFETIME(ASkyFlyJetPawn, Ammo);
 	DOREPLIFETIME(ASkyFlyJetPawn, Power);
 	DOREPLIFETIME(ASkyFlyJetPawn, Health);
@@ -168,11 +170,12 @@ void ASkyFlyJetPawn::MoveUp(float value)
 {
 	if (!HasAuthority())
 	{
-		Server_SetRotation(GetActorRightVector(), value * -20.f);
+		//Server_SetRotation(GetActorRightVector(), value * -40.f);
+		Server_MoveUp(value);
 	}
-	else if (IsLocallyControlled())
+	else// if (IsLocallyControlled())
 	{
-		JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -20.f, NAME_None, true);
+		JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -30.f, NAME_None, true);
 	}
 }
 
@@ -180,24 +183,24 @@ void ASkyFlyJetPawn::MoveRight(float value)
 {	
 	if (!HasAuthority())
 	{
-		Server_SetRotation(GetActorUpVector(), value * 20.f);
+		//Server_SetRotation(GetActorUpVector(), value * 40.f);
+		Server_MoveRight(value);
 	}
-	else if (IsLocallyControlled())
+	else// if (IsLocallyControlled())
 	{
-		JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 20.f, NAME_None, true);
+		JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 30.f, NAME_None, true);
 	}
 }
 
 void ASkyFlyJetPawn::Roll(float value)
 {
-
 	if (!HasAuthority())
 	{		
-		Server_SetRotation(GetActorForwardVector(), value * 20.f);
+		Server_Roll(value);
 	}
-	else if (IsLocallyControlled())
+	else //if (IsLocallyControlled())
 	{
-		JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 20.f, NAME_None, true);
+		JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 30.f, NAME_None, true);
 	}
 }
 
@@ -243,19 +246,15 @@ void ASkyFlyJetPawn::OnBulletFire()
 
 void ASkyFlyJetPawn::ChangeMode()
 {
-	if (!HasAuthority() && CurrentLaserState) //якщо лазер увімкнений на клієнті при переході в режим куль вирубити лазер
+	if (!HasAuthority() && CurrentLaserState) 
 	{
 		Server_OnLaserFire();
 	}
-	CurrentPowerMode = (CurrentPowerMode == EPowerMode::Off ? EPowerMode::On : EPowerMode::Off); //перемкнути режим
+	CurrentPowerMode = (CurrentPowerMode == EPowerMode::Off ? EPowerMode::On : EPowerMode::Off); 
 	if (CurrentLaserState)
-		CurrentLaserState = ELaserState::FireOff; //і вирубити лазер	
-	HandleLaser();	//якщо лазер увімкнений вирубити
+		CurrentLaserState = ELaserState::FireOff; 	
+	HandleLaser();	
 
-	/*if (!PlayerHUD)
-		return;
-
-	PlayerHUD->SwitcherWidget->UISwitcher->SetActiveWidgetIndex(CurrentPowerMode);*/
 	if (!PlayerController)
 		return;
 
@@ -370,39 +369,35 @@ void ASkyFlyJetPawn::SpawnBullet(FVector SpawnLocation, FRotator SpawnRotation, 
 	BulletWithdraw();
 }
 
-bool ASkyFlyJetPawn::Server_OnBulletFire_Validate(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
-{
-	return true;
-}
-
 void ASkyFlyJetPawn::Server_OnBulletFire_Implementation(FVector SpawnLocation, FRotator SpawnRotation, FVector Direction)
 {	
 	SpawnBullet(SpawnLocation, SpawnRotation, Direction);
 }
 
-bool ASkyFlyJetPawn::Server_SetRotation_Validate(FVector Direction, float value)
-{
-	return true;
-}
-
 void ASkyFlyJetPawn::Server_SetRotation_Implementation(FVector Direction, float value)
 {
+	//JetMesh->AddTorqueInDegrees(Direction * value, NAME_None, true);
 	JetMesh->AddTorqueInDegrees(Direction * value, NAME_None, true);
 }
 
-bool ASkyFlyJetPawn::Server_SetLinearVelocity_Validate(FVector NewVelocity)
+void ASkyFlyJetPawn::Server_MoveUp_Implementation(float value)
 {
-	return true;
+	JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -30.f, NAME_None, true);
+}
+
+void ASkyFlyJetPawn::Server_MoveRight_Implementation(float value)
+{
+	JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 30.f, NAME_None, true);
+}
+
+void ASkyFlyJetPawn::Server_Roll_Implementation(float value)
+{
+	JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 30.f, NAME_None, true);
 }
 
 void ASkyFlyJetPawn::Server_SetLinearVelocity_Implementation(FVector NewVelocity)
 {
 	ForwardVelocity = NewVelocity;
-}
-
-bool ASkyFlyJetPawn::Server_OnLaserFire_Validate()
-{
-	return true;
 }
 
 void ASkyFlyJetPawn::Server_OnLaserFire_Implementation()

@@ -5,6 +5,7 @@
 
 #include "Instruments/GameInstanceInfo.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Player/MenuPlayerController.h"
 
 void UMainMenu::NativeConstruct()
 {
@@ -21,14 +22,19 @@ void UMainMenu::OnHostButtonClick()
 {
 	if(IsInViewport())
 		RemoveFromParent();
-	GameInstanceRef->ShowHostMenu();	
+	//GameInstanceRef->ShowHostMenu();	 earlier
+	// now
+	this->GetOwningPlayer<AMenuPlayerController>()->ShowHostMenu();
 }
 
 void UMainMenu::OnJoinButtonClick()
 {
 	if(IsInViewport())
 		RemoveFromParent();
-	GameInstanceRef->ShowJoinMenu();
+	// then
+	//GameInstanceRef->ShowJoinMenu();
+	// now
+	this->GetOwningPlayer<AMenuPlayerController>()->ShowJoinMenu();
 }
 
 void UMainMenu::OnExitButtonClick()

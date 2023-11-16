@@ -49,14 +49,14 @@ private:
 
 public:	
 
-	UFUNCTION(BlueprintCallable)
+	/*UFUNCTION(BlueprintCallable)
 	void ShowMainMenu();
 
 	//UFUNCTION(BluepringPure)
 	void ShowHostMenu();
 
 	//UFUNCTION(BluepringPure)
-	void ShowJoinMenu();	
+	void ShowJoinMenu();	*/
 
 	void LaunchLobby(uint8 PlayerNumber, bool LAN, const FName& NameServer);
 

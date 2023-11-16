@@ -22,14 +22,19 @@ void ULobbyMenu::NativeConstruct()
 }
 
 void ULobbyMenu::OnLeaveButtonClick()
-{	
-	if(UKismetSystemLibrary::IsServer(GetWorld()))
+{
+	if(auto GM = GetWorld()->GetAuthGameMode<ALobbyGameModeBase>())
 	{
-		for(int Iter = GetWorld()->GetGameState<ASkyFlyGameStateBase>()->AllPlayerStates.Num() - 1; Iter > 0; Iter--)
+		for(int Iter = GetWorld()->GetGameState<ASkyFlyGameStateBase>()->PlayerArray.Num() - 1; Iter > 0; Iter--)
 		{
 			GetWorld()->GetAuthGameMode<ALobbyGameModeBase>()->KickPlayer(Iter);
-		}			
+		}	
 	}
+	//if(auto GM = GetWorld()->GetAuthGameMode<ALobbyGameModeBase>())
+		//GM->ResetTimer();
+		
+		
+	//UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
 	GetGameInstance<UGameInstanceInfo>()->DestroySession();	
 }
 

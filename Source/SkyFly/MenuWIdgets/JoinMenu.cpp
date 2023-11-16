@@ -3,6 +3,7 @@
 
 #include "MenuWIdgets/JoinMenu.h"
 #include "Instruments/GameInstanceInfo.h"
+#include "Player/MenuPlayerController.h"
 
 void UJoinMenu::NativeConstruct()
 {
@@ -20,7 +21,8 @@ void UJoinMenu::NativeConstruct()
 void UJoinMenu::OnBackButtonClick()
 {
 	RemoveFromParent();
-	GameInstanceRef->ShowMainMenu();
+	//GameInstanceRef->ShowMainMenu();
+	this->GetOwningPlayer<AMenuPlayerController>()->ShowMainMenu();
 }
 
 void UJoinMenu::OnJoinButtonClick()

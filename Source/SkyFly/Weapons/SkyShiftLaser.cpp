@@ -12,7 +12,7 @@ ASkyShiftLaser::ASkyShiftLaser()
 
 	BaseScene = CreateDefaultSubobject<USceneComponent>(TEXT("BaseComponent"));
 	LaserHitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("HitBox"));
-	LaserHitBox->bHiddenInGame = false;	
+	//LaserHitBox->bHiddenInGame = false;	
 
 	SetRootComponent(BaseScene);
 	LaserHitBox->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
