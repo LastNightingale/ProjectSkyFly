@@ -198,8 +198,11 @@ void UGameInstanceInfo::StartMatch()
 {
 	//GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?listen");
 	SetJoinable(false);
-	GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?game="
+	/*GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?game="
+						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen", true);*/
+	GetWorld()->ServerTravel("/Game/Maps/LevelMap?game="
 						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen", true);
+	//GetWorld()->SeamlessTravel();
 }
 
 void UGameInstanceInfo::ReturnToLobby()

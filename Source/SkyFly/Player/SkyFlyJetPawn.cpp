@@ -43,7 +43,8 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 	HealthBarWidget->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	HealthBarWidget->SetRelativeLocation({ 0.f, 0.f, 50.f });
 
-	Thrust = MaxThrust / 2.f;	
+	Thrust = MaxThrust / 2.f;
+	TurnSpeed = 75.f;
 
 	GunOffset = FVector(25.0f, 0.0f, -25.0f);
 	//JetMesh->OnComponent.AddDynamic(this, &ASkyFlyJetPawn::OnHit);	
@@ -110,7 +111,14 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 		HealthBarWidget->SetWorldRotation(PlayerRot);
 	}
 
-	JetMesh->SetPhysicsLinearVelocity(ForwardVelocity);		
+	//JetMesh->SetPhysicsLinearVelocity(ForwardVelocity);
+	/*DrawDebugLine(GetWorld(), GetActorLocation(),
+		GetActorLocation() + ForwardVelocity * 5000.f, FColor::Blue, true, -1, 0, 10);*/
+	
+	AddActorLocalOffset(ForwardVelocity * DeltaTime,  true);
+
+	AddActorLocalRotation(FRotator(CurrentPitchSpeed * DeltaTime, CurrentYawSpeed * DeltaTime,
+		CurrentRollSpeed * DeltaTime));
 }
 
 // Called to bind functionality to input
@@ -134,8 +142,8 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	/*DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
-	DOREPLIFETIME(ASkyFlyJetPawn, ForwardVelocity);*/
+	DOREPLIFETIME(ASkyFlyJetPawn, Thrust);
+	DOREPLIFETIME(ASkyFlyJetPawn, ForwardVelocity);
 	DOREPLIFETIME(ASkyFlyJetPawn, Ammo);
 	DOREPLIFETIME(ASkyFlyJetPawn, Power);
 	DOREPLIFETIME(ASkyFlyJetPawn, Health);
@@ -143,6 +151,9 @@ void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ASkyFlyJetPawn, CurrentPowerMode);
 	DOREPLIFETIME(ASkyFlyJetPawn, PlayerHPWidget);
 	DOREPLIFETIME(ASkyFlyJetPawn, HPColor);
+	DOREPLIFETIME(ASkyFlyJetPawn, CurrentPitchSpeed);
+	DOREPLIFETIME(ASkyFlyJetPawn, CurrentRollSpeed);
+	DOREPLIFETIME(ASkyFlyJetPawn, CurrentYawSpeed);
 }
 
 void ASkyFlyJetPawn::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
@@ -156,51 +167,82 @@ void ASkyFlyJetPawn::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrim
 
 void ASkyFlyJetPawn::JetThrust(float value)
 {
-	if (!FMath::IsNearlyZero(value))
+	if(HasAuthority())
 	{
-		float Res = FMath::Lerp(-MaxThrust, MaxThrust, (value + 1.f) / 2.f);
-		Thrust = FMath::FInterpTo(Thrust, Res, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 0.25);
-	}
-	ForwardVelocity = GetActorForwardVector() * Thrust;
-
-	Server_SetLinearVelocity(ForwardVelocity);
+		if (!FMath::IsNearlyZero(value))
+		{
+			float Res = FMath::Lerp(-MaxThrust, MaxThrust, (value + 1.f) / 2.f);
+			Thrust = FMath::FInterpTo(Thrust, Res, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 0.25);
+		}
+		
+		ForwardVelocity = FVector(Thrust, 0.f, 0.f);
+	}	
+	else
+	{
+		Server_SetLinearVelocity(value);
+	}	
 }
 
-void ASkyFlyJetPawn::MoveUp(float value)
+void ASkyFlyJetPawn::MoveUp(float Value)
 {
 	if (!HasAuthority())
 	{
 		//Server_SetRotation(GetActorRightVector(), value * -40.f);
-		Server_MoveUp(value);
+		Server_MoveUp(Value);
 	}
 	else// if (IsLocallyControlled())
 	{
-		JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -30.f, NAME_None, true);
+		float TargetPitchSpeed = (Value * TurnSpeed /** -1.f*/);
+
+		// When steering, we decrease pitch slightly
+		TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.1f + FMath::Abs(CurrentRollSpeed) * -0.1f);
+
+		// Smoothly interpolate to target pitch speed
+		CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
+		//JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -30.f, NAME_None, true);
+		//AddActorLocalRotation(FRotator(0.f, value * GetWorld()->DeltaTimeSeconds * 40.f, 0.f), true);
+		
 	}
 }
 
-void ASkyFlyJetPawn::MoveRight(float value)
+void ASkyFlyJetPawn::MoveRight(float Value)
 {	
 	if (!HasAuthority())
 	{
 		//Server_SetRotation(GetActorUpVector(), value * 40.f);
-		Server_MoveRight(value);
+		Server_MoveRight(Value);
 	}
 	else// if (IsLocallyControlled())
 	{
-		JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 30.f, NAME_None, true);
+		//JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 30.f, NAME_None, true);
+		//AddActorLocalRotation(FRotator(value * GetWorld()->DeltaTimeSeconds /* 400.f*/, 0.f, 0.f), true);
+		float TargetYawSpeed = (Value * TurnSpeed * 1.f);
+
+		// When steering, we decrease pitch slightly
+		TargetYawSpeed += (FMath::Abs(CurrentRollSpeed) * -0.1f + FMath::Abs(CurrentPitchSpeed) * -0.1f);
+
+		// Smoothly interpolate to target pitch speed
+		CurrentYawSpeed = FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 	}
 }
 
-void ASkyFlyJetPawn::Roll(float value)
+void ASkyFlyJetPawn::Roll(float Value)
 {
 	if (!HasAuthority())
 	{		
-		Server_Roll(value);
+		Server_Roll(Value);
 	}
 	else //if (IsLocallyControlled())
 	{
-		JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 30.f, NAME_None, true);
+		//JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 30.f, NAME_None, true);
+		//AddActorLocalRotation(FRotator(0.f, 0.f, value * GetWorld()->DeltaTimeSeconds /* 400.f*/), true);
+		float TargetRollSpeed = (Value * TurnSpeed /* -1.f*/);
+
+		// When steering, we decrease pitch slightly
+		TargetRollSpeed += (FMath::Abs(CurrentYawSpeed) * -0.1f + FMath::Abs(CurrentPitchSpeed) * -0.1f);
+
+		// Smoothly interpolate to target pitch speed
+		CurrentRollSpeed = FMath::FInterpTo(CurrentRollSpeed, TargetRollSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 	}
 }
 
@@ -238,7 +280,8 @@ void ASkyFlyJetPawn::OnBulletFire()
 				Server_OnLaserFire();
 			}
 			
-			CurrentLaserState = (CurrentLaserState == ELaserState::FireOff ? ELaserState::FireOn : ELaserState::FireOff);
+			CurrentLaserState = (CurrentLaserState == ELaserState::FireOff ? ELaserState::FireOn :
+				ELaserState::FireOff);
 			HandleLaser();		
 		}
 	}
@@ -380,24 +423,55 @@ void ASkyFlyJetPawn::Server_SetRotation_Implementation(FVector Direction, float 
 	JetMesh->AddTorqueInDegrees(Direction * value, NAME_None, true);
 }
 
-void ASkyFlyJetPawn::Server_MoveUp_Implementation(float value)
+void ASkyFlyJetPawn::Server_MoveUp_Implementation(float Value)
 {
-	JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -30.f, NAME_None, true);
+	//JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -30.f, NAME_None, true);
+	//AddActorLocalRotation(FRotator(0.f, Value * GetWorld()->DeltaTimeSeconds /* 400.f*/, 0.f), true);
+	float TargetPitchSpeed = (Value * TurnSpeed /** -1.f*/);
+
+	// When steering, we decrease pitch slightly
+	TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.1f + FMath::Abs(CurrentRollSpeed) * -0.1f);
+
+	// Smoothly interpolate to target pitch speed
+	CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
-void ASkyFlyJetPawn::Server_MoveRight_Implementation(float value)
+void ASkyFlyJetPawn::Server_MoveRight_Implementation(float Value)
 {
-	JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 30.f, NAME_None, true);
+	//JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 30.f, NAME_None, true);
+	//AddActorLocalRotation(FRotator(Value * GetWorld()->DeltaTimeSeconds /* 400.f*/, 0.f, 0.f), true);
+	float TargetYawSpeed = (Value * TurnSpeed * 1.f);
+
+	// When steering, we decrease pitch slightly
+	TargetYawSpeed += (FMath::Abs(CurrentRollSpeed) * -0.1f + FMath::Abs(CurrentPitchSpeed) * -0.1f);
+
+	// Smoothly interpolate to target pitch speed
+	CurrentYawSpeed = FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
-void ASkyFlyJetPawn::Server_Roll_Implementation(float value)
+void ASkyFlyJetPawn::Server_Roll_Implementation(float Value)
 {
-	JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 30.f, NAME_None, true);
+	//JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 30.f, NAME_None, true);
+	//AddActorLocalRotation(FRotator(0.f, 0.f, value * GetWorld()->DeltaTimeSeconds /* 400.f*/), true);
+	float TargetRollSpeed = (Value * TurnSpeed /* -1.f*/);
+
+	// When steering, we decrease pitch slightly
+	TargetRollSpeed += (FMath::Abs(CurrentYawSpeed) * -0.1f + FMath::Abs(CurrentPitchSpeed) * -0.1f);
+
+	// Smoothly interpolate to target pitch speed
+	CurrentRollSpeed = FMath::FInterpTo(CurrentRollSpeed, TargetRollSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
-void ASkyFlyJetPawn::Server_SetLinearVelocity_Implementation(FVector NewVelocity)
+void ASkyFlyJetPawn::Server_SetLinearVelocity_Implementation(float Value)
 {
-	ForwardVelocity = NewVelocity;
+	//ForwardVelocity = NewVelocity;
+	if (!FMath::IsNearlyZero(Value))
+	{
+		float Res = FMath::Lerp(-MaxThrust, MaxThrust, (Value + 1.f) / 2.f);
+		Thrust = FMath::FInterpTo(Thrust, Res, UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), 0.25);
+	}
+		
+	ForwardVelocity = FVector(Thrust, 0.f, 0.f);
 }
 
 void ASkyFlyJetPawn::Server_OnLaserFire_Implementation()

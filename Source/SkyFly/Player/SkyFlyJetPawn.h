@@ -120,6 +120,21 @@ public:
 	UPROPERTY(Replicated)
 	UEnemyHPWidget* PlayerHPWidget;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Plane")
+	float TurnSpeed;
+
+	/** Current yaw speed */
+	UPROPERTY(Replicated)
+	float CurrentYawSpeed;
+
+	/** Current pitch speed */
+	UPROPERTY(Replicated)
+	float CurrentPitchSpeed;
+
+	/** Current roll speed */
+	UPROPERTY(Replicated)
+	float CurrentRollSpeed;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -150,13 +165,13 @@ public:
 	void JetThrust(float value);
 
 	UFUNCTION()
-	void MoveUp(float value);
+	void MoveUp(float Value);
 
 	UFUNCTION()
-	void MoveRight(float value);
+	void MoveRight(float Value);
 
 	UFUNCTION()
-	void Roll(float value);
+	void Roll(float Value);
 
 	UFUNCTION()
 	void OnBulletFire();
@@ -198,20 +213,20 @@ public:
 	void Server_SetRotation_Implementation(FVector Direction, float value);
 
 	UFUNCTION(Server, unreliable)
-	void Server_MoveUp(float value);
-	void Server_MoveUp_Implementation(float value);
+	void Server_MoveUp(float Value);
+	void Server_MoveUp_Implementation(float Value);
 
 	UFUNCTION(Server, unreliable)
-	void Server_MoveRight(float value);
-	void Server_MoveRight_Implementation(float value);
+	void Server_MoveRight(float Value);
+	void Server_MoveRight_Implementation(float Value);
 
 	UFUNCTION(Server, unreliable)
-	void Server_Roll(float value);
-	void Server_Roll_Implementation(float value);
+	void Server_Roll(float Value);
+	void Server_Roll_Implementation(float Value);
 
 	UFUNCTION(Server, unreliable)
-	void Server_SetLinearVelocity(FVector NewVelocity);
-	void Server_SetLinearVelocity_Implementation(FVector NewVelocity);
+	void Server_SetLinearVelocity(float Value);
+	void Server_SetLinearVelocity_Implementation(float Value);
 	
 	UFUNCTION(Server, unreliable)
 	void Server_OnLaserFire();
