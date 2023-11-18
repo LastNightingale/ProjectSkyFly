@@ -60,6 +60,8 @@ AActor* ASkyFlyPlayerController::FindPlayerStarts()
 void ASkyFlyPlayerController::Client_KickPlayer_Implementation()
 {
 	GetGameInstance<UGameInstanceInfo>()->DestroySession();
+	UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0),
+			EQuitPreference::Quit, false);
 	//UGameplayStatics::OpenLevel(GetWorld(), "Minimal_Default");
 }
 

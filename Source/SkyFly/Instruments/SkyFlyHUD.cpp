@@ -11,6 +11,7 @@
 
 void ASkyFlyHUD::BeginPlay()
 {
+	Super::BeginPlay();
 	//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 	
 	/*SwitcherWidget = CreateWidget<UPowerModeSwitcher>(GetWorld(), UISwitcherClass);

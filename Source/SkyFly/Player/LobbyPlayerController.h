@@ -37,6 +37,7 @@ public:
 	UPROPERTY()
 	class ASkyFlyGameStateBase* GameStateRef; 
 
+	UFUNCTION(BlueprintCallable)
 	void UpdateLobby();
 
 	UFUNCTION(Client, reliable)	

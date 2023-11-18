@@ -69,8 +69,6 @@ void ALobbyPlayerController::BeginPlay()
 
 	GameStateRef = GetWorld()->GetGameState<ASkyFlyGameStateBase>();
 
-	check(GameStateRef);	
-
 	UpdateLobby();
 }
 

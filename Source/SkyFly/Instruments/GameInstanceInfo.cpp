@@ -4,6 +4,7 @@
 #include "GameInstanceInfo.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Engine/World.h"
 #include "MenuWIdgets/HostMenu.h"
 #include "MenuWIdgets/JoinMenu.h"
 #include "MenuWIdgets/MainMenu.h"
@@ -109,7 +110,7 @@ void UGameInstanceInfo::OnCreateSessionComplete(FName ServerName, bool Succeeded
 	if(Succeeded)
 	{
 		//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
-		GetWorld()->
+		//GetWorld()->
 		GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game=/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen");
 	}
 }
@@ -118,16 +119,9 @@ void UGameInstanceInfo::OnFindSessionComplete(bool Succeeded)
 {
 	if(Succeeded)
 	{
-		/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Find")));*/
 		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
 		if(SearchResults.Num())
 		{
-			/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("Found")));*/
-			/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("%d"), SearchResults[0].Session.SessionSettings.bShouldAdvertise));*/
-			//if(SearchResults[0].Session.SessionSettings.bShouldAdvertise)
 			SessionInterface->JoinSession(0, TEXT("ServerName"), SearchResults[0]);			
 		}
 	}
@@ -201,17 +195,18 @@ void UGameInstanceInfo::StartMatch()
 	/*GetWorld()->ServerTravel("/Game/StarterContent/Maps/Minimal_Default?game="
 						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen", true);*/
 	GetWorld()->ServerTravel("/Game/Maps/LevelMap?game="
-						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen", true);
+						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen");
 	//GetWorld()->SeamlessTravel();
 }
-
 void UGameInstanceInfo::ReturnToLobby()
 {
 	//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?listen");
+	//GetWorld()->SeamlessTravel("/Game/Maps/LobbyLevel?listen");
 	//GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game=/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen", false, false);
 	//SetJoinable(CheckConnectionAmount());
-	GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game="
-						  "/Game/BPClasses/BP_SkyFlyGameModeBase.BP_SkyFlyGameModeBase?listen");
+	/*GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game="
+						  "/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen");*/
+	GetWorld()->ServerTravel("/Game/Maps/LobbyLevel?game=/Game/BPClasses/BP_LobbyGameModeBase.BP_LobbyGameModeBase?listen", true);
 }
 
 void UGameInstanceInfo::SetJoinable(bool bIsJoinable)

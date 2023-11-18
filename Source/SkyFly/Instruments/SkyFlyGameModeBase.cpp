@@ -49,7 +49,7 @@ void ASkyFlyGameModeBase::Logout(AController* Exiting)
 
 void ASkyFlyGameModeBase::KickPlayer(uint8 PlayerID)
 {
-	AllPlayerControllers[PlayerID]->Client_KickPlayer();
+	AllPlayerControllers[PlayerID]->Client_KickPlayer();	
 }
 
 void ASkyFlyGameModeBase::UpdatePlayerList()

@@ -20,7 +20,7 @@ ASkyShiftLaser::ASkyShiftLaser()
 	LaserHitBox->OnComponentBeginOverlap.AddDynamic(this, &ASkyShiftLaser::OnLaserBeginOverlap);
 	LaserHitBox->OnComponentEndOverlap.AddDynamic(this, &ASkyShiftLaser::OnLaserEndOverlap);
 	
-	UE_LOG(LogTemp, Warning, TEXT("LaserSpawned"));
+	//UE_LOG(LogTemp, Warning, TEXT("LaserSpawned"));
 }
 
 // Called when the game starts or when spawned

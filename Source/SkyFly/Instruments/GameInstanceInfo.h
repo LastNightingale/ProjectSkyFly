@@ -21,7 +21,7 @@ private:
 
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Menu")
+	/*UPROPERTY(EditDefaultsOnly, Category = "Menu")
 	TSubclassOf<class UMainMenu> MainMenuClass;
 
 	UPROPERTY()
@@ -37,7 +37,7 @@ private:
 	TSubclassOf<class UHostMenu> HostMenuClass;
 
 	UPROPERTY()
-	UHostMenu* HostMenu;	
+	UHostMenu* HostMenu;*/	
 
 	uint8 NumberOfPlayers;
 	

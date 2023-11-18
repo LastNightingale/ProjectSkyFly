@@ -81,7 +81,17 @@ void ASkyFlyGameStateBase::CheckStateOfPlayers()
 
 	if(Players.Num() == 1)
 	{
-		EndGame();
+		//EndGame();
+		if(UKismetSystemLibrary::IsServer(GetWorld()))
+		{
+			for(int Iter = GetWorld()->GetGameState<ASkyFlyGameStateBase>()->AllPlayerStates.Num() - 1; Iter > 0; Iter--)
+			{
+				GetWorld()->GetAuthGameMode<ASkyFlyGameModeBase>()->KickPlayer(Iter);
+			}			
+		}
+		GetGameInstance<UGameInstanceInfo>()->DestroySession();
+		UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0),
+			EQuitPreference::Quit, false);
 	}
 	
 }
