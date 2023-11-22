@@ -16,12 +16,6 @@ class SKYFLY_API ASkyFlyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-protected:
-
-	virtual void BeginPlay() override;
-
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
 public:
 
 	void Respawn();
@@ -52,8 +46,6 @@ public:
 	void SetupHUD();
 
 	void OpenPlayerList();
-	
-	void ClosePlayerList();
 
 	void EndHUD();
 

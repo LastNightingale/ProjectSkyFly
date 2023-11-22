@@ -22,8 +22,6 @@ void UMainMenu::OnHostButtonClick()
 {
 	if(IsInViewport())
 		RemoveFromParent();
-	//GameInstanceRef->ShowHostMenu();	 earlier
-	// now
 	this->GetOwningPlayer<AMenuPlayerController>()->ShowHostMenu();
 }
 
@@ -31,9 +29,6 @@ void UMainMenu::OnJoinButtonClick()
 {
 	if(IsInViewport())
 		RemoveFromParent();
-	// then
-	//GameInstanceRef->ShowJoinMenu();
-	// now
 	this->GetOwningPlayer<AMenuPlayerController>()->ShowJoinMenu();
 }
 

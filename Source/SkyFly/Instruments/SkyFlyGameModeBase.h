@@ -30,8 +30,6 @@ public:
 
 	void UpdatePlayerList();
 
-	void EndGame();
-
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
 private:

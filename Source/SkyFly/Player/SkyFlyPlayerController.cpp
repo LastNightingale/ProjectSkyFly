@@ -15,23 +15,6 @@
 class UGameInstanceInfo;
 class AGamePlayerStart;
 
-void ASkyFlyPlayerController::BeginPlay()
-{
-	Super::BeginPlay();
-
-	/*if(IsLocalController())
-		SetupHUD();*/
-}
-
-void ASkyFlyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	
-	
-	Super::EndPlay(EndPlayReason);
-
-	//GetHUD<ASkyFlyHUD>()->EndHUD();
-}
-
 void ASkyFlyPlayerController::Respawn()
 {
 	if(APawn* OldPlayerPawn = GetPawn())
@@ -62,7 +45,6 @@ void ASkyFlyPlayerController::Client_KickPlayer_Implementation()
 	GetGameInstance<UGameInstanceInfo>()->DestroySession();
 	UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0),
 			EQuitPreference::Quit, false);
-	//UGameplayStatics::OpenLevel(GetWorld(), "Minimal_Default");
 }
 
 void ASkyFlyPlayerController::SetupHUD()
@@ -91,11 +73,7 @@ void ASkyFlyPlayerController::OpenPlayerList()
 }
 
 void ASkyFlyPlayerController::EndHUD()
-{
-
-	/*GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-		FString::Printf(TEXT("END HUD")));*/
-	
+{	
 	if(SwitcherWidget)
 	{		
 		SwitcherWidget->RemoveFromParent();

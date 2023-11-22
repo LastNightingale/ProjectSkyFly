@@ -24,8 +24,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Menu")
 	TSubclassOf<class ULobbyMenu> LobbyMenuClass;
 
-	UPROPERTY(ReplicatedUsing = OnSessionNameChange)
-	FName SessionName;
+	/*UPROPERTY(ReplicatedUsing = OnSessionNameChange)
+	FName SessionName;*/
 
 	FTimerHandle TimerHandle;
 	
@@ -49,11 +49,6 @@ public:
 	void Client_KickPlayer_Implementation();
 
 	virtual void BeginPlay() override;
-
-	UFUNCTION()
-	void OnSessionNameChange();
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	
 };

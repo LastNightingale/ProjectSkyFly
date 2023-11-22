@@ -30,8 +30,6 @@ public:
 	void UpdatePlayerList();
 
 	UPROPERTY()
-	TArray<class ALobbyPlayerController*> AllPlayerControllers;
-
-	void ResetTimer();
+	TArray<class ALobbyPlayerController*> AllPlayerControllers;;
 	
 };

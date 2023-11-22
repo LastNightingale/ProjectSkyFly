@@ -30,11 +30,6 @@ void ULobbyMenu::OnLeaveButtonClick()
 			GetWorld()->GetAuthGameMode<ALobbyGameModeBase>()->KickPlayer(Iter);
 		}	
 	}
-	//if(auto GM = GetWorld()->GetAuthGameMode<ALobbyGameModeBase>())
-		//GM->ResetTimer();
-		
-		
-	//UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
 	GetGameInstance<UGameInstanceInfo>()->DestroySession();	
 }
 

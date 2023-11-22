@@ -18,11 +18,6 @@ void ALobbyGameModeBase::GenericPlayerInitialization(AController* C)
 
 void ALobbyGameModeBase::Logout(AController* Exiting)
 {
-	/*AllPlayerControllers.Remove(Cast<ALobbyPlayerController>(Exiting));
-
-	UpdatePlayerList();*/
-	
-	//auto PC = Cast<APlayerController>(Exiting);
 	if(!Cast<APlayerController>(Exiting)->HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Done"));
@@ -46,11 +41,4 @@ void ALobbyGameModeBase::UpdatePlayerList()
 		if(auto GS = GetGameState<ASkyFlyGameStateBase>())
 			GS->UpdatePlayerList();
 	}, 0.1, false);
-	//GetGameState<ASkyFlyGameStateBase>()->UpdatePlayerList();
-}
-
-void ALobbyGameModeBase::ResetTimer()
-{
-	if (GetWorldTimerManager().IsTimerActive(TimerHandle))
-		GetWorldTimerManager().ClearTimer(TimerHandle);
 }

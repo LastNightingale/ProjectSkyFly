@@ -61,11 +61,6 @@ void ASkyFlyGameModeBase::UpdatePlayerList()
 	
 }
 
-void ASkyFlyGameModeBase::EndGame()
-{
-	//GetGameInstance<UGameInstanceInfo>()->ReturnToLobby();
-}
-
 AActor* ASkyFlyGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 {
 	for(TActorIterator<AGamePlayerStart> Iter(GetWorld()); Iter; ++Iter)

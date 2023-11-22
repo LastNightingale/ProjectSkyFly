@@ -5,13 +5,10 @@
 
 #include "ProjectDeveloperSettings.h"
 #include "SkyFlyGameModeBase.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
-#include "Player/LobbyPlayerController.h"
 #include "Player/SkyFlyJetPawn.h"
 #include "Instruments/GameInstanceInfo.h"
 
@@ -40,12 +37,6 @@ void ASkyFlyGameStateBase::UpdatePlayerList()
 		}		
 	}
 	OnPlayerListChanged.ExecuteIfBound(AllPlayerStates);
-
-	/*if(AllPlayerStates.Num() > 1 && HasAuthority())
-	{
-		auto GI = GetGameInstance<UGameInstanceInfo>();
-		GI->SetJoinable(GI->CheckConnectionAmount());
-	}*/
 		
 }
 
@@ -62,13 +53,6 @@ void ASkyFlyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(ASkyFlyGameStateBase, AllPlayerNames);
 }
 
-
-
-void ASkyFlyGameStateBase::UpdateControllerWidget(APlayerController* NewPlayer)
-{
-	//Cast<ALobbyPlayerController>(NewPlayer)->UpdateLobby();
-}
-
 void ASkyFlyGameStateBase::CheckStateOfPlayers()
 {
 	TArray<APlayerState*> Players;
@@ -81,7 +65,6 @@ void ASkyFlyGameStateBase::CheckStateOfPlayers()
 
 	if(Players.Num() == 1)
 	{
-		//EndGame();
 		if(UKismetSystemLibrary::IsServer(GetWorld()))
 		{
 			for(int Iter = GetWorld()->GetGameState<ASkyFlyGameStateBase>()->AllPlayerStates.Num() - 1; Iter > 0; Iter--)

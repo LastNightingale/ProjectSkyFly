@@ -22,8 +22,6 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UPlayerListItem> ItemClass;
 
-	void UpdateWidget();
-
 	virtual void NativeConstruct() override;
 
 	UPROPERTY()
@@ -31,8 +29,4 @@ public:
 
 	UFUNCTION()
 	void OnPlayerListUpdate(TArray<APlayerState*> Players);
-	
-	/*UFUNCTION(Client, reliable)	
-	void ClientUpdateLobby();	
-	void ClientUpdateLobby_Implementation();*/
 };

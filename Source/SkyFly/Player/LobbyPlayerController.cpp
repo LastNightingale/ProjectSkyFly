@@ -12,43 +12,26 @@
 #include "Net/UnrealNetwork.h"
 
 void ALobbyPlayerController::UpdateLobby()
-{
-	/*if(!IsLocalController())
-	{
-		return;
-	}*/
-	
-	
+{	
 	if(!IsLocalController())
 	{
-		//ensureMsgf(LobbyMenu != nullptr, TEXT("Not nullptr at start"));
 		ClientUpdateLobby();
 		return;
 	}
-
-	SessionName = GetGameInstance<UGameInstanceInfo>()->GetSessionName();
 	
 	if(!LobbyMenu)
-	{
-		//ensureMsgf(LobbyMenu != nullptr, TEXT("Not nullptr"));
-		
+	{		
 		if(!LobbyMenuClass)
 			return;
-
-		//UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
 		
 		LobbyMenu = CreateWidget<ULobbyMenu>(this, LobbyMenuClass);
 		if(HasAuthority())
 			LobbyMenu->SetServer();
 
-		/*GameStateRef = GetWorld()->GetGameState<ASkyFlyGameStateBase>();*/
-
 		GameStateRef->OnPlayerListChanged.Unbind();
 		GameStateRef->OnPlayerListChanged.BindUObject(LobbyMenu->PlayerList,
 		&UPlayerList::OnPlayerListUpdate);
 	}
-
-	//check(LobbyMenu);
 
 	if(!LobbyMenu->IsInViewport())
     LobbyMenu->AddToViewport();	
@@ -101,16 +84,4 @@ void ALobbyPlayerController::ClientUpdateLobby_Implementation()
 
 	SetShowMouseCursor(true);
 	UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(this, LobbyMenu);
-}
-
-void ALobbyPlayerController::OnSessionNameChange()
-{	
-	GetGameInstance<UGameInstanceInfo>()->SetSessionName(SessionName);
-}
-
-void ALobbyPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ALobbyPlayerController, SessionName);
 }

@@ -21,24 +21,6 @@ private:
 
 	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 
-	/*UPROPERTY(EditDefaultsOnly, Category = "Menu")
-	TSubclassOf<class UMainMenu> MainMenuClass;
-
-	UPROPERTY()
-	UMainMenu* MainMenu;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Menu")
-	TSubclassOf<class UJoinMenu> JoinMenuClass;
-
-	UPROPERTY()
-	UJoinMenu* JoinMenu;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Menu")
-	TSubclassOf<class UHostMenu> HostMenuClass;
-
-	UPROPERTY()
-	UHostMenu* HostMenu;*/	
-
 	uint8 NumberOfPlayers;
 	
 	FName NameOfServer;
@@ -49,22 +31,9 @@ private:
 
 public:	
 
-	/*UFUNCTION(BlueprintCallable)
-	void ShowMainMenu();
-
-	//UFUNCTION(BluepringPure)
-	void ShowHostMenu();
-
-	//UFUNCTION(BluepringPure)
-	void ShowJoinMenu();	*/
-
-	void LaunchLobby(uint8 PlayerNumber, bool LAN, const FName& NameServer);
+	void LaunchLobby(uint8 PlayerNumber);
 
 	void JoinLobby(const FName& NameServer);
-
-	void SetSessionName(const FName Name);
-
-	FName GetSessionName() const;
 
 	virtual void Init() override;
 
@@ -85,8 +54,4 @@ public:
 	void StartMatch();
 
 	void ReturnToLobby();
-
-	void SetJoinable(bool bIsJoinable);
-
-	bool CheckConnectionAmount();
 };

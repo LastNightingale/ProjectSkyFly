@@ -47,16 +47,13 @@ ASkyFlyJetPawn::ASkyFlyJetPawn()
 	TurnSpeed = 75.f;
 
 	GunOffset = FVector(25.0f, 0.0f, -25.0f);
-	//JetMesh->OnComponent.AddDynamic(this, &ASkyFlyJetPawn::OnHit);	
 	
 }
 
 // Called when the game starts or when spawned
 void ASkyFlyJetPawn::BeginPlay()
 {
-	Super::BeginPlay();
-
-	
+	Super::BeginPlay();	
 
 	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->PlayerRef = this;
 	Cast<UEnemyHPWidget>(HealthBarWidget->GetWidget())->HealthBar->FillColorAndOpacity = HPColor;
@@ -110,10 +107,6 @@ void ASkyFlyJetPawn::Tick(float DeltaTime)
 			UGameplayStatics::GetPlayerPawn(GetWorld(),0)->GetActorLocation());
 		HealthBarWidget->SetWorldRotation(PlayerRot);
 	}
-
-	//JetMesh->SetPhysicsLinearVelocity(ForwardVelocity);
-	/*DrawDebugLine(GetWorld(), GetActorLocation(),
-		GetActorLocation() + ForwardVelocity * 5000.f, FColor::Blue, true, -1, 0, 10);*/
 	
 	AddActorLocalOffset(ForwardVelocity * DeltaTime,  true);
 
@@ -135,7 +128,6 @@ void ASkyFlyJetPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("ChangeMode", IE_Pressed, this, &ASkyFlyJetPawn::ChangeMode);
 	PlayerInputComponent->BindAction("Pause", IE_Pressed, this, &ASkyFlyJetPawn::OnPause);
 	PlayerInputComponent->BindAction("OpenPlayerPanel", IE_Pressed, this, &ASkyFlyJetPawn::OpenPlayerPanel);
-	//PlayerInputComponent->BindAction("ClosePlayerPanel", IE_Released, this, &ASkyFlyJetPawn::ClosePlayerPanel);
 }
 
 void ASkyFlyJetPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -187,21 +179,16 @@ void ASkyFlyJetPawn::MoveUp(float Value)
 {
 	if (!HasAuthority())
 	{
-		//Server_SetRotation(GetActorRightVector(), value * -40.f);
 		Server_MoveUp(Value);
 	}
-	else// if (IsLocallyControlled())
+	else
 	{
-		float TargetPitchSpeed = (Value * TurnSpeed /** -1.f*/);
-
-		// When steering, we decrease pitch slightly
+		float TargetPitchSpeed = (Value * TurnSpeed);
+		
 		TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.1f + FMath::Abs(CurrentRollSpeed) * -0.1f);
 
-		// Smoothly interpolate to target pitch speed
 		CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
-		//JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -30.f, NAME_None, true);
-		//AddActorLocalRotation(FRotator(0.f, value * GetWorld()->DeltaTimeSeconds * 40.f, 0.f), true);
-		
+			
 	}
 }
 
@@ -209,19 +196,14 @@ void ASkyFlyJetPawn::MoveRight(float Value)
 {	
 	if (!HasAuthority())
 	{
-		//Server_SetRotation(GetActorUpVector(), value * 40.f);
 		Server_MoveRight(Value);
 	}
-	else// if (IsLocallyControlled())
+	else
 	{
-		//JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 30.f, NAME_None, true);
-		//AddActorLocalRotation(FRotator(value * GetWorld()->DeltaTimeSeconds /* 400.f*/, 0.f, 0.f), true);
 		float TargetYawSpeed = (Value * TurnSpeed * 1.f);
-
-		// When steering, we decrease pitch slightly
+		
 		TargetYawSpeed += (FMath::Abs(CurrentRollSpeed) * -0.1f + FMath::Abs(CurrentPitchSpeed) * -0.1f);
-
-		// Smoothly interpolate to target pitch speed
+		
 		CurrentYawSpeed = FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 	}
 }
@@ -232,16 +214,12 @@ void ASkyFlyJetPawn::Roll(float Value)
 	{		
 		Server_Roll(Value);
 	}
-	else //if (IsLocallyControlled())
+	else
 	{
-		//JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 30.f, NAME_None, true);
-		//AddActorLocalRotation(FRotator(0.f, 0.f, value * GetWorld()->DeltaTimeSeconds /* 400.f*/), true);
-		float TargetRollSpeed = (Value * TurnSpeed /* -1.f*/);
-
-		// When steering, we decrease pitch slightly
+		float TargetRollSpeed = (Value * TurnSpeed);
+		
 		TargetRollSpeed += (FMath::Abs(CurrentYawSpeed) * -0.1f + FMath::Abs(CurrentPitchSpeed) * -0.1f);
 
-		// Smoothly interpolate to target pitch speed
 		CurrentRollSpeed = FMath::FInterpTo(CurrentRollSpeed, TargetRollSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 	}
 }
@@ -329,11 +307,6 @@ void ASkyFlyJetPawn::SpawnLaser()
 
 void ASkyFlyJetPawn::DestroyLaser()
 {
-	/*if (!HasAuthority() && !IsLocallyControlled())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("LaserTriedDestroyed"));
-		UE_LOG(LogTemp, Warning, TEXT("Laser: %d"), (Laser != nullptr));
-	}	*/
 	if (!Laser)
 		return;
 
@@ -395,17 +368,13 @@ void ASkyFlyJetPawn::SpawnBullet(FVector SpawnLocation, FRotator SpawnRotation, 
 {
 	ASkyShiftBullet* Bullet = GetWorld()->SpawnActor<ASkyShiftBullet>(BulletClass, SpawnLocation, SpawnRotation);
 
-	/*DrawDebugLine(GetWorld(), SpawnLocation + GetActorRotation().RotateVector(GunOffset),
-		GetActorForwardVector().RotateAngleAxis(35.f, GetActorRightVector()) * 5000.f, FColor::Emerald, true, -1, 0, 10);*/
 
 	if (!Bullet)
 		return;
 
 	Bullet->SetOwner(this);
 	Bullet->BulletMesh->MoveIgnoreActors.Add(GetInstigator());
-	Bullet->BulletMesh->MoveIgnoreActors.Add(this);							
-
-	//DrawDebugLine(GetWorld(), GetActorLocation(), GetActorForwardVector() * 5000.f, FColor::Emerald, true, -1, 0, 10);
+	Bullet->BulletMesh->MoveIgnoreActors.Add(this);		
 
 	Bullet->SetVelocity(Direction);
 
@@ -419,52 +388,38 @@ void ASkyFlyJetPawn::Server_OnBulletFire_Implementation(FVector SpawnLocation, F
 
 void ASkyFlyJetPawn::Server_SetRotation_Implementation(FVector Direction, float value)
 {
-	//JetMesh->AddTorqueInDegrees(Direction * value, NAME_None, true);
 	JetMesh->AddTorqueInDegrees(Direction * value, NAME_None, true);
 }
 
 void ASkyFlyJetPawn::Server_MoveUp_Implementation(float Value)
 {
-	//JetMesh->AddTorqueInDegrees(GetActorRightVector() * value * -30.f, NAME_None, true);
-	//AddActorLocalRotation(FRotator(0.f, Value * GetWorld()->DeltaTimeSeconds /* 400.f*/, 0.f), true);
-	float TargetPitchSpeed = (Value * TurnSpeed /** -1.f*/);
+	float TargetPitchSpeed = (Value * TurnSpeed);
 
-	// When steering, we decrease pitch slightly
 	TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.1f + FMath::Abs(CurrentRollSpeed) * -0.1f);
 
-	// Smoothly interpolate to target pitch speed
 	CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
 void ASkyFlyJetPawn::Server_MoveRight_Implementation(float Value)
 {
-	//JetMesh->AddTorqueInDegrees(GetActorUpVector() * value * 30.f, NAME_None, true);
-	//AddActorLocalRotation(FRotator(Value * GetWorld()->DeltaTimeSeconds /* 400.f*/, 0.f, 0.f), true);
 	float TargetYawSpeed = (Value * TurnSpeed * 1.f);
 
-	// When steering, we decrease pitch slightly
 	TargetYawSpeed += (FMath::Abs(CurrentRollSpeed) * -0.1f + FMath::Abs(CurrentPitchSpeed) * -0.1f);
 
-	// Smoothly interpolate to target pitch speed
 	CurrentYawSpeed = FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
 void ASkyFlyJetPawn::Server_Roll_Implementation(float Value)
 {
-	//JetMesh->AddTorqueInDegrees(GetActorForwardVector() * value * 30.f, NAME_None, true);
-	//AddActorLocalRotation(FRotator(0.f, 0.f, value * GetWorld()->DeltaTimeSeconds /* 400.f*/), true);
-	float TargetRollSpeed = (Value * TurnSpeed /* -1.f*/);
+	float TargetRollSpeed = (Value * TurnSpeed);
 
-	// When steering, we decrease pitch slightly
 	TargetRollSpeed += (FMath::Abs(CurrentYawSpeed) * -0.1f + FMath::Abs(CurrentPitchSpeed) * -0.1f);
 
-	// Smoothly interpolate to target pitch speed
 	CurrentRollSpeed = FMath::FInterpTo(CurrentRollSpeed, TargetRollSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
 void ASkyFlyJetPawn::Server_SetLinearVelocity_Implementation(float Value)
 {
-	//ForwardVelocity = NewVelocity;
 	if (!FMath::IsNearlyZero(Value))
 	{
 		float Res = FMath::Lerp(-MaxThrust, MaxThrust, (Value + 1.f) / 2.f);
@@ -530,7 +485,6 @@ float ASkyFlyJetPawn::GetMaxHealth() const
 
 float ASkyFlyJetPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Health: %u"), Health);
 	(Health > DamageAmount) ? Health = Health - DamageAmount : Health = 0.f;
 
 	if(PlayerHPWidget)
@@ -550,9 +504,7 @@ void ASkyFlyJetPawn::OnKillZoneEnter(UPrimitiveComponent* OverlappedComponent, A
 	{
 		if(LaserCollided->GetOwner() != this)
 			this->TakeDamage(LaserCollided->DamagePerTick, DamageEvent, LaserCollided->GetInstigatorController(), LaserCollided);
-		//UE_LOG(LogTemp, Warning, TEXT("BulletTime"));
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("Why Don't You Work("));
 }
 
 void ASkyFlyJetPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -562,7 +514,6 @@ void ASkyFlyJetPawn::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor
 		const FDamageEvent DamageEvent;
 		this->TakeDamage(Bullet->Damage, DamageEvent, Bullet->GetInstigatorController(), Bullet);
 		Bullet->Destroy();
-		//UE_LOG(LogTemp, Warning, TEXT("BulletTime"));
 	}
 }
 

@@ -24,35 +24,21 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* IncreasePlayersButton;
 
-	/*UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	UButton* DecreaseNetButton;
-
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	UButton* IncreaseNetButton;*/
-
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* CreateButton;
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	UButton* BackButton;
-	
-	/*UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	UEditableTextBox* ServerName;*/
 
 	UPROPERTY()
 	class UGameInstanceInfo* GameInstanceRef;
 	
 	uint8 MaxNumberOfPlayers;
 
-	bool EnabledLAN;	
-
 public:
 
 	UPROPERTY(BlueprintReadOnly)
 	uint8 NumberOfPlayers;
-	
-	UPROPERTY(BlueprintReadOnly)
-	FText NetText;
 
 	virtual void NativeConstruct() override;	
 
@@ -66,16 +52,6 @@ public:
 	void OnDecreasePlayersButtonClick();
 
 	UFUNCTION()
-	void OnIncreasePlayersButtonClick();
-
-	UFUNCTION()
-	void OnDecreaseNetButtonClick();
-
-	UFUNCTION()
-	void OnIncreaseNetButtonClick();
-
-	UFUNCTION()
-	void OnServerNameChanged(const FText& Text);
-	
+	void OnIncreasePlayersButtonClick();	
 	
 };
